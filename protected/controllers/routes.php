@@ -32,32 +32,16 @@ $app->get('/[{name}]', function ($request, $response, $args) {
         $mpost = new \ExtensionsModel\PostModel();
     }
 
-    if (isset($_GET['e']) && $_GET['e'] > 0) { // editing procedure
-        $view_path = $settings['theme']['path'] . '/' . $settings['theme']['name'] . '/views';
-        if (file_exists($view_path.'/'.$args['name'] . '.phtml')) {
-            if (file_exists($view_path.'/staging/'.$args['name'] . '.ehtml')) {
-                unlink($view_path.'/staging/'.$args['name'] . '.ehtml');
-            }
-            $cp = copy($view_path.'/'.$args['name'] . '.phtml', $view_path.'/staging/'.$args['name'] . '.ehtml');
-            if ($cp) {
-                $content = file_get_contents($view_path.'/staging/'.$args['name'] . '.ehtml');
-                $parsed_content = str_replace(array("{{", "}}"), array("[[", "]]"), $content);
-
-                $update = file_put_contents($view_path.'/staging/'.$args['name'] . '.ehtml', $parsed_content);
-            }
-
-            return $this->view->render($response, 'staging/' . $args['name'] . '.ehtml', [
-                'name' => $args['name'],
-                'mpost' => $mpost,
-                'request' => $_GET
-            ]);
-        }
+    $msong = null;
+    if (in_array( 'song', $exts )) {
+        $msong = new \ExtensionsModel\SongModel();
     }
 
     return $this->view->render($response, $args['name'] . '.phtml', [
         'name' => $args['name'],
-        'request' => $_GET,
-        'mpost' => $mpost
+        'request' => $request->getParams(),
+        'mpost' => $mpost,
+        'msong' => $msong
     ]);
 });
 

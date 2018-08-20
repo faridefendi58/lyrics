@@ -1,0 +1,121 @@
+{% extends "layout.html" %}
+{% block pagetitle %}
+Perbarui Lirik - {{ App.params.site_name }}
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ 'css/bootstrap-fileupload.min.css' | admin_asset_url }}" />
+<div id="main_wrapper">
+	<div class="page_bar clearfix">
+		<div class="row">
+			<div class="col-sm-8">
+				<h1 class="page_title">{{ song.title }}</h1>
+				<p class="text-muted">Ubah postingan</p>
+			</div>
+			<div class="col-sm-4 text-right">
+				<a class="btn btn-default" href="{{ 'song/lyrics/view' | link }}">Daftar Postingan</a>
+				<a class="btn btn-default" href="{{ 'lirik' | link }}/{{ song.slug }}" target="_newtab">Lihat Postingan</a>
+			</div>
+		</div>
+	</div>
+	<div class="page_content">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							Kolom bertanda <span class="red">*</span> tidak boleh dikosongi
+						</div>
+						<div class="panel-body">
+							{% include 'songs/_form.html' with {'song':song, 'status_list':status_list} %}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% include 'partial/right_menu.html' %}
+{% endblock %}
+{% block endbodyjs %}
+<script src="{{ 'js/bootstrap-fileupload.min.js' | admin_asset_url }}"></script>
+<script type="text/javascript" src="{{ 'lib/tinymce/tinymce.min.js' | admin_asset_url }}"></script>
+<script type="text/javascript">
+    $(function(){
+        tinymce.init({
+            selector : '.editor',
+            remove_linebreaks : false,
+            gecko_spellcheck : false,
+            keep_styles : true,
+            accessibility_focus : true,
+            tabfocus_elements : 'major-publishing-actions',
+            media_strict : false,
+            height: 400,
+            plugins : 'code image imagetools paste codesample',
+            menubar : false,
+            toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | pastetext image code codesample',
+            codesample_languages: [
+                {text: 'HTML/XML', value: 'markup'},
+                {text: 'JavaScript', value: 'javascript'},
+                {text: 'CSS', value: 'css'},
+                {text: 'PHP', value: 'php'},
+                {text: 'Ruby', value: 'ruby'},
+                {text: 'Python', value: 'python'},
+                {text: 'Java', value: 'java'},
+                {text: 'C', value: 'c'},
+                {text: 'C#', value: 'csharp'},
+                {text: 'C++', value: 'cpp'}
+            ],
+            images_upload_handler: function (blobInfo, success, failure) {
+                var xhr, formData;
+
+                xhr = new XMLHttpRequest();
+                xhr.withCredentials = false;
+                xhr.open('POST', '{{ "song/lyrics/direct-upload" | link }}');
+
+                xhr.onload = function() {
+                    var json;
+
+                    if (xhr.status != 200) {
+                        failure('HTTP Error: ' + xhr.status);
+                        return;
+                    }
+
+                    var json = $.parseJSON(xhr.responseText);
+
+                    if (!json || typeof json.location != 'string') {
+                        failure('Invalid JSON: ' + xhr.responseText);
+                        return;
+                    }
+
+                    success(json.location);
+                };
+
+                formData = new FormData();
+                formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+                xhr.send(formData);
+            }
+        });
+        var success_message = "{{ message }}";
+        if (success_message && success_message.length > 0) {
+            setTimeout(function () {
+                window.location.href = "{{ 'song/lyrics/update' | link }}/{{ song.id }}";
+            }, 2000);
+        }
+    });
+    function getSlug(data){
+        var lang = $(data).attr('lang');
+        $.ajax({
+            'beforeSend': function() {  },
+            'complete': function() {  },
+            'url': "{{ 'song/lyrics/get-slug' | link }}",
+            'type':'post',
+            'data':{'title':$(data).val()},
+            'success': function(data) {
+                $('#slug').attr('value',data);
+            }
+        });
+    }
+</script>
+{% endblock %}

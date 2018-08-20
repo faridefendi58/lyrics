@@ -1,0 +1,221 @@
+{% extends "layout.html" %}
+{% block pagetitle %}
+Generate Lirik Lagu - {{ App.params.site_name }}
+{% endblock %}
+
+{% block content %}
+<div id="main_wrapper">
+    <div class="page_bar clearfix">
+        <div class="row">
+            <div class="col-sm-5">
+                <h1 class="page_title">Generate Lirik Lagu</h1>
+                <p class="text-muted">Formulir penambahan data lirik lagu</p>
+            </div>
+            <div class="col-sm-7 text-right">
+                <ul class="navbar-nav pull-right" style="list-style-type: none;">
+                    <li class="nav-item" itemprop="url">
+                        <a href="{{ 'song/lyrics/view' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                            Daftar Lirik Lagu
+                        </a>
+                    </li>
+                    <li class="nav-item" itemprop="url">
+                        <a href="{{ 'song/lyrics/scraping-task' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                            Daftar Scraping Task
+                        </a>
+                    </li>
+                    <li class="nav-item" itemprop="url">
+                        <a href="{{ 'song/lyrics/generate-song' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                            Generate Judul Lagu
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="page_content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Kolom bertanda <span class="red">*</span> tidak boleh dikosongi
+                        </div>
+                        <div class="panel-body">
+                            {% if message %}
+                            <div class="alert {% if success %}alert-success{% else %}alert-warning{% endif %}">{{ message }}</div>
+                            {% endif %}
+                            <form method="post" name="page-create">
+                                <div class="row">
+                                    <div class="form-group col-sm-6">
+                                        <label>Artist</label>
+                                        <select name="Songs[artist_id]" class="form-control" id="artist-list">
+                                            {% for artist in artists %}
+                                            <option value="{{ artist.id }}"
+                                                    attr-url="{{ artist.song_url }}"
+                                                    attr-section="{{ artist.song_section }}"
+                                                    {% if song.artist_id == artist.id %}selected{% endif %}>{{ artist.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-sm-6">
+                                        <label>Url <span class="red">*</span></label>
+                                        <input type="text" name="Songs[url]" class="form-control" value="{{ params.url }}" id="song_url">
+                                    </div>
+                                    <div class="form-group col-sm-6">
+                                        <label>Section <span class="red">*</span></label>
+                                        <input type="text" name="Songs[section]" class="form-control" id="song_section"
+                                               value="{{ params.section }}" placeholder="Ex: ul#lyric-centerlist a">
+                                    </div>
+                                    <div class="form-group col-sm-6">
+                                        <label>Lyric Section (Optional)</label>
+                                        <input type="text" name="Songs[lyric_section]" class="form-control"
+                                               value="{{ params.lyric_section }}" placeholder="Ex: span.lirik_line">
+                                        <p class="text-muted">Class or ID of the lyric area. Ex: span.lirik_line</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-sm-12">
+                                        <input type="submit" name="Submit" value="Generate" class="btn btn-success btn-submit">
+                                        {% if (items | length) > 0 %}
+                                        <input type="submit" name="Submit" value="Simpan Sekarang" class="btn btn-info btn-submit">
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if (items | length) > 0 %}
+                                <div id="dt_basic_wrapper" class="dataTables_wrapper form-inline no-footer table-responsive" role="grid">
+                                    <table id="dt_basic" class="table table-striped">
+                                        <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Name</th>
+                                            <th>Url</th>
+                                            <th><input type="checkbox" name="check_all" checked="checked"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for i, item in items %}
+                                        <tr>
+                                            <td>{{ i + 1 }}</td>
+                                            <td>
+                                                {{ item.title }}
+                                                <input type="hidden" name="Songs[title][{{ i }}]" value="{{ item.title }}">
+                                            </td>
+                                            <td>
+                                                <a href="{{ item.url }}" target="_newtab">{{ item.url }}</a>
+                                                <input type="hidden" name="Songs[song_url][{{ i }}]" value="{{ item.url }}">
+                                            </td>
+                                            <td>
+                                                <input type="checkbox" name="choose[{{ i }}]" class="action" checked="checked">
+                                            </td>
+                                        </tr>
+                                        {% else %}
+                                        <tr class="no-data">
+                                            <td>No data founds</td>
+                                        </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% endif %}
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Daftar Hasil Generate (Belum Dieksekusi)
+                        </div>
+                        <div class="panel-body">
+                            {% if (songs | length) > 0 %}
+                            <div id="dt_basic_wrapper2" class="dataTables_wrapper form-inline no-footer table-responsive" role="grid">
+                                <table id="dt_basic2" class="table table-striped dataTable">
+                                    <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Title</th>
+                                        <th>Url</th>
+                                        <th>&nbsp;</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for i, song in songs %}
+                                    <tr>
+                                        <td>{{ i + 1 }}</td>
+                                        <td>
+                                            {{ song.title }}
+                                        </td>
+                                        <td>
+                                            <a href="{{ song.slug }}" target="_newtab">{{ song.slug }}</a>
+                                        </td>
+                                        <td>
+                                            <a href="{{ 'song/lyrics/delete-song' | link }}/{{ song.id }}" onclick="return hapus(this);">
+                                                <i class="fa fa-trash-o"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td>No data founds</td>
+                                    </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% include 'partial/right_menu.html' %}
+{% endblock %}
+{% block endbodyjs %}
+<script src="{{ 'lib/DataTables/media/js/jquery.dataTables.min.js' | admin_asset_url }}"></script>
+<script src="{{ 'lib/DataTables/media/js/dataTables.bootstrap.js' | admin_asset_url }}"></script>
+<script type="text/javascript">
+    $(function () {
+        $('input[name="check_all"]').click(function () {
+            if ($(this).is(":checked")){
+                $('.action').prop('checked', true);
+            } else {
+                $('.action').prop('checked', false);
+            }
+            return true;
+        });
+        $('#song_url').val($("#artist-list").find('option:selected').attr("attr-url"));
+        $('#song_section').val($("#artist-list").find('option:selected').attr("attr-section"));
+        $("#artist-list").change(function(){
+            var element = $(this).find('option:selected');
+            var url = element.attr("attr-url");
+            var section = element.attr("attr-section");
+
+            $('#song_url').val(url);
+            $('#song_section').val(section);
+        });
+    });
+    function hapus(data) {
+        if (confirm('Are you sure to delete ?')) {
+            var $this =  $(data);
+            var url = $this.attr('href');
+            $.ajax({
+                'url': url,
+                'type':'post',
+                'dataType': 'json',
+                'success': function(data) {
+                    if (data.success == 1) {
+                        $this.parent().parent().remove();
+                    } else {
+                        alert(data.message);
+                    }
+                }
+            });
+        }
+        return false;
+    }
+</script>
+{% endblock %}

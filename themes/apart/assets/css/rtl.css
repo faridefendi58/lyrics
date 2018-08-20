@@ -1,0 +1,54 @@
+.footer-logo,.gallery-slide-cont{left:0}
+.owl-carousel{direction:ltr}
+.footer-newsletter button{margin-right:0;margin-left:-20px}
+.cs-skin-border>span{padding:15px 65px 15px 15px}
+div.cs-select{text-align:right}
+.adv-search-col-cont1,.adv-search-icons{padding-right:15px}
+.adv-search-amount{text-align:left;float:left;direction:ltr}
+.adv-search-label{float:right}
+.adv-search-range-cont span,.navbar-right,.navigation-box{float:left}
+.featured-offer-col,.grid-offer,.team-member-cont,.testimonial{direction:rtl}
+.grid-price{text-align:left}
+.footer-blog-date i.fa,footer address i.fa{margin-right:0;margin-left:15px}
+.footer-blog-date,.footer-blog-title{float:right;margin-left:0;margin-right:20px}
+.footer-blog-image{float:right}
+.footer-blog-title{font-weight:700;height:70px;line-height:1.38em;overflow:hidden}
+.sidebar-blog-date i.fa{margin-right:0;margin-left:15px}
+.agent-bar-text{margin:0 10px 0 20px}
+#slide-more-cont{float:left}
+#swiper1 .slide-desc h4,.top-bar span{float:right}
+.details-ticks{list-style-type:none;margin-right:30px;margin-left:0;padding:0}
+.details-ticks li{padding:0 0 0 26px}
+.details-ticks li i.jfont{margin-right:0;margin-left:10px}
+.blue-ul li{width:100%;border-bottom:1px solid #ebebeb;padding:8px 0 7px 19px}
+.blue-ul ul{margin-right:30px}
+.ticks-ul li{padding:2px 0 2px 26px;margin:0}
+.custom-ul ul,.ticks-ul ul{margin-right:30px}
+.custom-ul li{width:100%;padding:2px 0 2px 19px}
+.footer-ul li{padding:5px 0 4px}
+.adv-search-range-cont span{padding:1px 5px 0 0}
+.blog-grid1-topline i.fa{padding-left:10px;padding-right:0}
+.team-icon-circle{margin-right:0;margin-left:10px}
+.top-bar-text{margin-left:0;margin-right:10px}
+.dropdown-submenu>.dropdown-menu{top:0;right:100%;margin-top:5px;margin-right:-5px}
+.dropdown-submenu>a::after{display:block;content:" ";float:left;width:0;height:0;border-color:transparent #ccc transparent transparent;border-style:solid;border-width:0;margin-top:3px;margin-left:-18px}
+.dropdown-menu>li>a{padding:13px 20px 13px 40px}
+.grid-offer-localization{float:right;margin-right:0;margin-left:10px}
+.grid-offer-h4{float:right}
+.custom-ul-bullet{display:inline-block;height:6px;margin:0 0 1px 10px;width:6px}
+.details-image{margin-right:0;margin-left:15px}
+@media only screen and (min-width:768px) and (max-width:991px){.footer-logo{left:50%}
+}
+@media only screen and (max-width:767px){.dropdown-submenu>a::after{display:block;content:" ";float:right;width:0;height:0;border-style:solid;border-width:0;border-color:transparent}
+	.footer-logo{left:50%}
+	article.blog-grid1-item{margin-left:0;margin-right:10%}
+}
+@media only screen and (min-width:1200px){.short-offers-container{padding-left:20px}
+}
+@media only screen and (max-width:991px){.sidebar-blog-image,.sidebar-featured-image{float:right}
+	.sidebar-blog-title,.sidebar-featured-title{margin-left:0}
+	.sidebar-blog-date,.sidebar-featured-price{margin-right:15px}
+}
+@media only screen and (max-width:480px){.details-ticks,.footer-blog-date,.sidebar-blog-date{margin-right:0}
+	.footer-blog-title{height:auto;margin-right:0}
+}

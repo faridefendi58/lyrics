@@ -1,0 +1,62 @@
+{% if message %}
+<div class="alert {% if success %}alert-success{% else %}alert-warning{% endif %}">{{ message }}</div>
+{% endif %}
+<form method="post" name="page-create">
+    <div class="row">
+        <div class="form-group col-sm-6">
+            <label>Title <span class="red">*</span></label>
+            <input type="text" name="Songs[title]" class="form-control" onchange="getSlug(this)"
+                   value="{{ song.title }}">
+        </div>
+        <div class="form-group col-sm-6">
+            <label>Permalink <span class="red">*</span></label>
+            <input type="text" name="Songs[slug]" class="form-control" id="slug" value="{{ song.slug }}">
+        </div>
+        <div class="form-group col-sm-6">
+            <label>Artist</label>
+            <select name="Songs[artist_id]" class="form-control">
+                {% for artist in artists %}
+                <option value="{{ artist.id }}" {% if song and song.artist_id == artist.id %}selected{% endif %}>{{ artist.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group col-sm-6">
+            <label>Url Refference <span class="red">*</span></label>
+            <input type="text" name="Songs[refference_url]" class="form-control"
+                   value="{{ song.lyric_url }}">
+        </div>
+        <div class="form-group col-sm-6">
+            <label>Genre</label>
+            <select name="Songs[genre_id]" class="form-control">
+                {% for genre in genres %}
+                <option value="{{ genre.id }}" {% if song and song.genre_id == genre.id %}selected{% endif %}>{{ genre.title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group col-sm-6">
+            <label>Scrap Section <span class="red">*</span></label>
+            <input type="text" name="Songs[refference_section]" class="form-control" value="{{ song.lyric_section }}">
+        </div>
+        {% if song and song.lyric %}
+        <div class="form-group col-sm-12">
+            <label>Content <span class="red">*</span></label>
+            <textarea class="form-control editor" name="Songs[content]">{{ song.lyric }}</textarea>
+        </div>
+        {% endif %}
+        {% if song %}
+        <div class="form-group col-sm-6">
+            <label>Status</label>
+            {% for status_code, status_name in status_list %}
+            <label class="radio-inline">
+                <input type="radio" name="Songs[status]" id="optionsRadios1" value="{{ status_code }}"
+                       {% if status_code == song.status %}checked="checked"{% endif %}>
+                {{ status_name }}
+            </label>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    <div class="form-group col-sm-12">
+        <input type="submit" name="Submit" value="{% if not song %}Create{% else %}Update{% endif %}" class="btn btn-success btn-submit">
+    </div>
+</form>

@@ -1,0 +1,187 @@
+{% extends "layout.html" %}
+{% block pagetitle %}
+Daftar Lirik Lagu - {{ App.params.site_name }}
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ 'lib/DataTables/media/css/jquery.dataTables.min.css' | admin_asset_url }}">
+<div id="main_wrapper">
+    <div class="page_bar clearfix">
+        <div class="row">
+            <div class="col-sm-5">
+                <h1 class="page_title">Postingan Lirik Lagu</h1>
+                <p class="text-muted">Daftar postingan untuk lagu</p>
+            </div>
+            <div class="col-sm-7 text-right">
+                <ul class="navbar-nav pull-right" style="list-style-type: none;">
+                    <li class="nav-item" itemprop="url">
+                        <a href="{{ 'song/lyrics/create' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                            Buat Postingan Baru
+                        </a>
+                    </li>
+                    <li class="nav-item" itemprop="url">
+                        <a href="{{ 'song/lyrics/scraping-task' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                            Daftar Scraping Task
+                        </a>
+                    </li>
+                    <li class="nav-item" itemprop="url">
+                        <a href="{{ 'song/lyrics/generate-artist' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                            Generate Nama Artis
+                        </a>
+                    </li>
+                    <li class="nav-item" itemprop="url">
+                        <a href="{{ 'song/lyrics/generate-song' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                            Generate Judul Lagu
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="page_content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Postingan Lirik Lagu</div>
+                        <div class="panel-body">
+                            <ul class="nav nav-tabs" id="tabs_a">
+                                <li class="active">
+                                    <a data-toggle="tab" href="#need-approval">
+                                        Neeed Approval <span class="badge badge-warning">{{ need_approvals | length }}</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a data-toggle="tab" href="#approved">
+                                        Approved Lyrics <span class="badge badge-primary">{{ approveds | length }}</span>
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="tabs_content_a">
+                                <div id="need-approval" class="tab-pane fade in active">
+                                    <div id="dt_basic_wrapper" class="dataTables_wrapper form-inline no-footer table-responsive" role="grid">
+                                        <table id="dt_basic" class="table table-striped dataTable">
+                                            <thead>
+                                            <tr>
+                                                <th>id</th>
+                                                <th>Title</th>
+                                                <th>Artist Name</th>
+                                                <th>Permalink</th>
+                                                <th>Status Postingan</th>
+                                                <th>&nbsp;</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for i, song in need_approvals %}
+                                            <tr>
+                                                <td>{{ i + 1 }}</td>
+                                                <td>{{ song.title }}</td>
+                                                <td>
+                                                    <a href="{{ 'song/artists/detail' | link }}/{{ song.artist_id }}">{{ song.artist_name }}</a>
+                                                </td>
+                                                <td>
+                                                    {% set song_url = model.buildSongUrl({'artist':song.artist_slug,'title':song.slug}) %}
+                                                    <a href="{{ song_url | link }}" target="_newtab">{{ song_url | link }}</a>
+                                                </td>
+                                                <td><center>{{ song.status }}</center></td>
+                                                <td>
+                                                    <a href="{{ 'song/lyrics/update' | link }}/{{ song.id }}">
+                                                        <i class="fa fa-pencil"></i>
+                                                    </a>
+                                                    <a href="{{ 'song/lyrics/delete' | link }}/{{ song.id }}" onclick="return hapus(this);">
+                                                        <i class="fa fa-trash-o"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% else %}
+                                            <tr class="no-data">
+                                                <td>No data founds</td>
+                                            </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div id="approved" class="tab-pane fade">
+                                    <div id="dt_basic_wrapper2" class="dataTables_wrapper form-inline no-footer table-responsive" role="grid">
+                                        <table id="dt_basic2" class="table table-striped dataTable">
+                                            <thead>
+                                            <tr>
+                                                <th>id</th>
+                                                <th>Title</th>
+                                                <th>Artist Name</th>
+                                                <th>Permalink</th>
+                                                <th>Status Postingan</th>
+                                                <th>&nbsp;</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for i, approved in approveds %}
+                                            <tr>
+                                                <td>{{ i + 1 }}</td>
+                                                <td>{{ approved.title }}</td>
+                                                <td>
+                                                    <a href="{{ 'song/artists/detail' | link }}/{{ approved.artist_id }}">{{ approved.artist_name }}</a>
+                                                </td>
+                                                <td>
+                                                    {% set song_url = model.buildSongUrl({'artist':approved.artist_slug,'title':approved.slug}) %}
+                                                    <a href="{{ song_url | link }}" target="_newtab">{{ song_url | link }}</a>
+                                                </td>
+                                                <td><center>{{ approved.status }}</center></td>
+                                                <td>
+                                                    <a href="{{ 'song/lyrics/update' | link }}/{{ approved.id }}">
+                                                        <i class="fa fa-pencil"></i>
+                                                    </a>
+                                                    <a href="{{ 'song/lyrics/delete' | link }}/{{ approved.id }}" onclick="return hapus(this);">
+                                                        <i class="fa fa-trash-o"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% else %}
+                                            <tr class="no-data">
+                                                <td>No data founds</td>
+                                            </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="row">
+                        <div class="row">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% include 'partial/right_menu.html' %}
+{% endblock %}
+{% block endbodyjs %}
+<script src="{{ 'lib/DataTables/media/js/jquery.dataTables.min.js' | admin_asset_url }}"></script>
+<script src="{{ 'lib/DataTables/media/js/dataTables.bootstrap.js' | admin_asset_url }}"></script>
+<script type="text/javascript">
+function hapus(data) {
+	if (confirm('Are you sure to delete ?')) {
+		var $this =  $(data);
+		var url = $this.attr('href');
+		$.ajax({
+			'url': url,
+			'type':'post',
+			'dataType': 'json',
+			'success': function(data) {
+				if (data) {
+					$this.parent().parent().remove();
+				}
+			}
+		});
+	}
+	return false;
+}
+</script>
+{% endblock %}
