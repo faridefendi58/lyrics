@@ -45,16 +45,24 @@ class SongArtistModel extends \Model\BaseModel
         return $items;
     }
 
-    public function getGenerateResults() {
-        $sql = "SELECT t.*, s.id AS song_id, a.title AS abjad  
+    public function getGenerateResults($data = null) {
+        $sql = "SELECT t.*, s.id AS song_id, a.title AS abjad, COUNT(s.id) AS tot_song   
           FROM {tablePrefix}ext_song_artists t 
           LEFT JOIN {tablePrefix}ext_song s ON s.artist_id = t.id 
           LEFT JOIN {tablePrefix}ext_song_abjads a ON a.id = t.abjad_id 
           WHERE 1";
 
+        $params = [];
+        if (isset($data['abjad_id'])) {
+            $sql .= " AND t.abjad_id =:abjad_id";
+            $params['abjad_id'] = $data['abjad_id'];
+        }
+
+        $sql.= " GROUP BY t.name";
+
         $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
 
-        $rows = \Model\R::getAll( $sql );
+        $rows = \Model\R::getAll( $sql, $params );
 
         return $rows;
     }

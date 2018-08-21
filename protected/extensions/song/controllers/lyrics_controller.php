@@ -504,11 +504,17 @@ class LyricsController extends BaseController
             }
         }
 
+        $song_artist_params = [ 'abjad_id' => 1 ];
+        if (isset($params['Songs']['abjad_id'])) {
+            $song_artist_params['abjad_id'] = $params['Songs']['abjad_id'];
+        }
+
         return $this->_container->module->render($response, 'songs/generate_song.html', [
             'params' => $params['Songs'],
             'items' => $items,
-            'artists' => $samodel->getGenerateResults(),
+            'artists' => $samodel->getGenerateResults($song_artist_params),
             'songs' => $smodel->getGenerateResults(),
+            'smodel' => $smodel,
             'message' => ($message) ? $message : null,
             'success' => $success,
         ]);

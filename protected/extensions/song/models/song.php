@@ -292,4 +292,29 @@ class SongModel extends \Model\BaseModel
 
         return $rows;
     }
+
+    public function getArtists($data=null) {
+        $sql = "SELECT t.name AS artist_name, t.slug AS artist_slug, COUNT(s.id) AS tot_song  
+          FROM {tablePrefix}ext_song s 
+          LEFT JOIN {tablePrefix}ext_song_artists t ON t.id = s.artist_id 
+          WHERE 1";
+
+        $params = [];
+        if ($data['abjad_id']) {
+            $sql .= ' AND t.abjad_id =:abjad_id';
+            $params['abjad_id'] = $data['abjad_id'];
+        }
+
+        $sql .= ' GROUP BY s.artist_id';
+
+        if ($data['has_song']) {
+            $sql .= ' HAVING tot_song > 0';
+        }
+
+        $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+        $rows = \Model\R::getAll( $sql, $params );
+
+        return $rows;
+    }
 }

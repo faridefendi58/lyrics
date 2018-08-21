@@ -905,7 +905,7 @@ h4.neighbourhood-title{text-transform:none;font-size:1.31em;margin-bottom:25px}
     header.sticky-start{margin-top:0;position:fixed}
     header.sticky{margin-top:-40px;position:fixed}
     header.header3.sticky{height:105px;margin-top:-42px}
-    header.sticky .main-menu-cont{height:60px}
+    header.sticky .main-menu-cont{height:60px;-webkit-box-shadow: 0 5px 5px 0 rgba(0,0,0,.2);-moz-box-shadow: 0 5px 5px 0 rgba(0,0,0,.2);box-shadow: 0 5px 5px 0 rgba(0,0,0,.2);}
     header.header3.sticky .navbar-brand img{margin-top:30px}
     header.sticky .navbar-brand img{margin-top:-4px}
     header.sticky .navbar-nav>li>a{padding:10px 20px 10px}
@@ -1128,7 +1128,8 @@ h4.neighbourhood-title{text-transform:none;font-size:1.31em;margin-bottom:25px}
     .navigation-box2-cont .navigation-box-prev{margin-left:-102px}
     .simple-search-cont{height:120px;margin-left:0}
     .simple-search-cont input.simple-search-input{padding:0 15px 0 190px;width:100%;position:relative;top:0;left:0}
-    .simple-search-cont .button-primary{position:absolute;top:60px;right:25px;float:none!important}
+    .simple-search-cont .button-primary{position:absolute;top:160px;right:25px;float:none!important}
+    .simple-search-cont .bootstrap-select:not([class*="col-"]):not([class*="form-control"]):not(.input-group-btn), .simple-search-cont .cs-select {  top: 110px;}
     .gallery-grid-item,.gallery-grid-sizer{width:33.333%}
     .masonry-grid .masonry-grid-item-big,.masonry-grid .masonry-grid-sizer{width:46%}
     .gallery-filter{margin:0 3px 6px;padding:0 15px;height:40px;line-height:40px;font-size:1em}
@@ -1160,7 +1161,7 @@ h4.neighbourhood-title{text-transform:none;font-size:1.31em;margin-bottom:25px}
     .simple-search-cont input.simple-search-input{position:static;width:100%;padding:0 15px;border-top-width:1px;border-top-style:solid}
     .simple-search-cont .cs-skin-border>span::before{border:none}
     .simple-search-cont .cs-skin-border .cs-options{min-width:75%;z-index:150}
-    .simple-search-cont .button-primary{position:absolute;top:110px;right:25px;float:none!important}
+    .simple-search-cont .button-primary {position: absolute;top: 180px;left: 25px;float: none !important;}
     .move-top{width:40px;height:40px}
     .move-top .big-triangle-second-color{border-width:0 0 40px 40px}
     .move-top .big-icon-second-color{height:30px;width:30px;right:4px;bottom:4px}

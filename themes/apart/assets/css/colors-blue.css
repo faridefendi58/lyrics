@@ -44,7 +44,8 @@ header.header2 .top-icon-circle:hover,header.header3 .top-icon-circle:hover{back
 .profile-list-edit:hover{background:#1e8e19}
 html.no-pointerevents.no-touchevents .list-agency:hover .list-agency-separator{background:#54abeb}
 .agency-map,.details-map,.submit-property-map{background:#e1e1e1}
-.loader-bg{background:url(../images/loader.png) center center no-repeat #fff}
+.loader-bg {border: 16px solid #f3f3f3;border-top: 16px solid #3498db;border-radius: 50%;width: 120px;height: 120px;animation: spin 2s linear infinite;margin:auto;left:0;right: 0;top: 0;bottom: 0;}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); }}
 header.header2.header-dark,header.header3.header-dark{background:rgba(27,40,53,.8)}
 .hover-menu::after,.navbar-nav>li>a.dropdown-toggle:hover::after{background:url(../images/menu-carret.png) bottom center no-repeat}
 header.header2 .hover-menu::after,header.header2 .navbar-nav>li>a.dropdown-toggle:hover::after,header.header3 .hover-menu::after,header.header3 .navbar-nav>li>a.dropdown-toggle:hover::after{background:0 0}
@@ -185,7 +186,16 @@ html.no-pointerevents.no-touchevents .list-agency:hover .list-agency-right,html.
     .list-offer-right,.list-offer-right-large{border-width:0}
     .list-offer{border:1px solid #eaeaea}
 }
-@media only screen and (min-width:768px){header.header2.sticky,header.header3.sticky{background:#1B2835}
+@media only screen and (min-width:768px){
+    header.header2.sticky,header.header3.sticky{background:#1B2835}
 }
-@media only screen and (max-width:480px){.simple-search-cont input.simple-search-input{border-bottom:1px solid #ebebeb}
+@media only screen and (max-width:480px){
+    .simple-search-cont input.simple-search-input{border-bottom:1px solid #ebebeb}
+    header.header2 nav.navbar {background-color: #1b2835;}
+    header.header2 nav.navbar .navbar-toggle {background: none !important;}
+    header.header2 nav.navbar .navbar-toggle .icon-bar {background:#fff;}
+    header.header2.sticky .navbar-nav, header.header2 .navbar-nav {margin:0px -15px;}
+    header.header2.sticky .navbar-nav>li, header.header2 .navbar-nav>li {border-bottom: 1px solid #d0d0d0;}
+    header.header2.sticky .navbar-nav>li>a, header.header2 .navbar-nav>li>a {padding:10px;margin-bottom:0px;margin-top: 0px;}
+    .simple-search-cont .bootstrap-select:not([class*=col-]):not([class*=form-control]):not(.input-group-btn), .simple-search-cont .cs-select {  left: 0px;}
 }

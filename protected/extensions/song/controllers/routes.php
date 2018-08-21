@@ -9,17 +9,36 @@ $app->get('/lirik/search', function ($request, $response, $args) {
         'params' => $params,
     ]);
 });
+
 $app->get('/lirik[/{artist}[/{title}]]', function ($request, $response, $args) {
     $theme = $this->settings['theme'];
     $model = new \ExtensionsModel\SongModel();
 
     if (empty($args['title'])) {
-        $abjad = $model->getAbjad(['slug' => $args['artist']]);
-        if (is_array($abjad) && !empty($abjad['id'])) {
+        // it should be the title = artist slug if the length > 0
+        if (strlen($args['artist']) > 1){
+            $amodel = \ExtensionsModel\SongArtistModel::model()->findByAttributes(['slug' => $args['artist']]);
+            $songs = null;
+            if ($amodel instanceof \RedBeanPHP\OODBBean) {
+                $songs = $model->getSongs(['artist_id' => $amodel->id]);
+            }
 
-            return $this->view->render($response, 'song_abjad.phtml', [
-                'abjad' => $abjad,
-                'model' => $model
+            return $this->view->render($response, 'song_lyric_index.phtml', [
+                'model' => $model,
+                'songs' => $songs,
+                'amodel' => $amodel
+            ]);
+        } else { //if the title is Abjad
+            $abmodel = \ExtensionsModel\SongAbjadModel::model()->findByAttributes(['title' => strtoupper($args['artist'])]);
+            $artists = null;
+            if ($abmodel instanceof \RedBeanPHP\OODBBean) {
+                $artists = $model->getArtists(['abjad_id' => $abmodel->id]);
+            }
+
+            return $this->view->render($response, 'song_lyric_index.phtml', [
+                'model' => $model,
+                'selected_abjad' => strtoupper($args['artist']),
+                'artists' => $artists
             ]);
         }
     } else {
