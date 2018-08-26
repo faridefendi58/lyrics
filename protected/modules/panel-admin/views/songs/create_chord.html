@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block pagetitle %}
-Tambah Lirik Baru - {{ App.params.site_name }}
+Tambah Chord Baru - {{ App.params.site_name }}
 {% endblock %}
 
 {% block extended_css %}
@@ -11,24 +11,24 @@ Tambah Lirik Baru - {{ App.params.site_name }}
 <div id="main_wrapper">
     <div class="page_bar clearfix">
         <div class="row">
-            <div class="col-sm-7">
-                <h1 class="page_title">Tambah Postingan Lirik Baru</h1>
-                <p class="text-muted">Formulir penambahan postingan lirik baru</p>
+            <div class="col-sm-6">
+                <h1 class="page_title">Tambah Postingan Chord Baru</h1>
+                <p class="text-muted">Formulir penambahan postingan chord baru</p>
             </div>
-            <div class="col-sm-5 text-right">
+            <div class="col-sm-6 text-right">
                 <ul class="navbar-nav pull-right" style="list-style-type: none;">
                     <li class="nav-item" itemprop="url">
-                        <a href="{{ 'song/lyrics/view' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
-                            Daftar Lirik Lagu
+                        <a href="{{ 'song/chords/view' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                            Daftar Chord Lagu
                         </a>
                     </li>
                     <li class="nav-item" itemprop="url">
-                        <a href="{{ 'song/lyrics/scraping-task' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                        <a href="{{ 'song/chords/scraping-task' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
                             Daftar Scraping Task
                         </a>
                     </li>
                     <li class="nav-item" itemprop="url">
-                        <a href="{{ 'song/lyrics/generate-song' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                        <a href="{{ 'song/chords/generate-song' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
                             Generate Judul Lagu
                         </a>
                     </li>
@@ -90,7 +90,7 @@ Tambah Lirik Baru - {{ App.params.site_name }}
 
                 xhr = new XMLHttpRequest();
                 xhr.withCredentials = false;
-                xhr.open('POST', '{{ "song/lyrics/direct-upload" | link }}');
+                xhr.open('POST', '{{ "song/chords/direct-upload" | link }}');
 
                 xhr.onload = function() {
                     var json;
@@ -119,7 +119,7 @@ Tambah Lirik Baru - {{ App.params.site_name }}
         var success_message = "{{ message }}";
         if (success_message && success_message.length > 0) {
             setTimeout(function () {
-                window.location.href = "{{ 'song/lyrics/update' | link }}/{{ post_id }}";
+                window.location.href = "{{ 'song/chords/update' | link }}/{{ post_id }}";
             }, 2000);
         }
         if($('.select2-basic').length) {
@@ -131,18 +131,17 @@ Tambah Lirik Baru - {{ App.params.site_name }}
         $('.select-song').change(function () {
             var title = $(".select-song").find('option:selected').attr("attr-title");
             var artist_id = $(".select-song").find('option:selected').attr("attr-artist_id");
-            var artist_name = $(".select-song").find('option:selected').attr("attr-artist_name");
-            var song_url = $(".select-song").find('option:selected').attr("attr-song_url");
-            var song_section = $(".select-song").find('option:selected').attr("attr-song_section");
+            var chord_url = $(".select-song").find('option:selected').attr("attr-chord_url");
+            var chord_section = $(".select-song").find('option:selected').attr("attr-chord_section");
             var genre_id = $(".select-song").find('option:selected').attr("attr-genre_id");
             $('input[id="song-title"]').val(title);
             $('select[id="select-artist"]').val(artist_id).trigger("change");
 
             buildSlug(title);
-            $('input[id="song-url"]').val(song_url);
-            $('input[id="refference-section"]').val(song_section);
+            $('input[id="song-url"]').val(chord_url);
+            $('input[id="refference-section"]').val(chord_section);
             if (parseInt(genre_id) > 0)
-                $('select[id="song-genre"]').val(song_section);
+                $('select[id="song-genre"]').val(chord_section);
         });
     });
     function getSlug(data){

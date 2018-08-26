@@ -1,10 +1,6 @@
 {% extends "layout.html" %}
 {% block pagetitle %}
-Generate Lirik Lagu - {{ App.params.site_name }}
-{% endblock %}
-
-{% block extended_css %}
-<link rel="stylesheet" href="{{ 'lib/select2/select2.css' | admin_asset_url }}">
+Generate Artist - {{ App.params.site_name }}
 {% endblock %}
 
 {% block content %}
@@ -12,23 +8,23 @@ Generate Lirik Lagu - {{ App.params.site_name }}
     <div class="page_bar clearfix">
         <div class="row">
             <div class="col-sm-5">
-                <h1 class="page_title">Generate Lirik Lagu</h1>
-                <p class="text-muted">Formulir penambahan data lirik lagu</p>
+                <h1 class="page_title">Generate Nama Artis</h1>
+                <p class="text-muted">Formulir penambahan data artis</p>
             </div>
             <div class="col-sm-7 text-right">
                 <ul class="navbar-nav pull-right" style="list-style-type: none;">
                     <li class="nav-item" itemprop="url">
-                        <a href="{{ 'song/lyrics/view' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
-                            Daftar Lirik Lagu
+                        <a href="{{ 'song/chords/view' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                            Daftar Kord Gitar
                         </a>
                     </li>
                     <li class="nav-item" itemprop="url">
-                        <a href="{{ 'song/lyrics/scraping-task' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                        <a href="{{ 'song/chords/scraping-task' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
                             Daftar Scraping Task
                         </a>
                     </li>
                     <li class="nav-item" itemprop="url">
-                        <a href="{{ 'song/lyrics/generate-song' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                        <a href="{{ 'song/chords/generate-song' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
                             Generate Judul Lagu
                         </a>
                     </li>
@@ -50,41 +46,19 @@ Generate Lirik Lagu - {{ App.params.site_name }}
                             {% endif %}
                             <form method="post" name="page-create">
                                 <div class="row">
-                                    <div class="form-group col-sm-2">
-                                        <label>Abjab</label>
-                                        {% set abjads = smodel.getAbjads() %}
-                                        <select name="Songs[abjad_id]" class="form-control" id="abjad-list">
-                                            {% for ab,abjad in abjads %}
-                                            <option value="{{ ab }}"
-                                                    {% if params.abjad_id == ab %}selected{% endif %}>{{ abjad }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="form-group col-sm-5">
-                                        <label>Artist Name</label>
-                                        <select name="Songs[artist_id]" class="form-control select2-basic" id="artist-list">
-                                            {% for artist in artists %}
-                                            <option value="{{ artist.id }}"
-                                                    attr-url="{% if not use_for_chord %}{{ artist.song_url }}{% else %}{{ artist.chord_url }}{% endif %}"
-                                                    attr-section="{% if use_for_chord %}{{ artist.chord_url }}{% else %}{{ artist.song_section }}{% endif %}"
-                                                    {% if params.artist_id == artist.id %}selected{% endif %}>{{ artist.name }} ({{ artist.tot_song }} song)</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="form-group col-sm-5">
+                                    <div class="form-group col-sm-4">
                                         <label>Url <span class="red">*</span></label>
-                                        <input type="text" name="Songs[url]" class="form-control" value="{{ params.url }}" id="song_url">
+                                        <input type="text" name="Artist[url]" class="form-control" value="{{ params.url }}">
                                     </div>
-                                    <div class="form-group col-sm-6">
+                                    <div class="form-group col-sm-4">
                                         <label>Section <span class="red">*</span></label>
-                                        <input type="text" name="Songs[section]" class="form-control" id="song_section"
-                                               value="{{ params.section }}" placeholder="Ex: ul#lyric-centerlist a">
+                                        <input type="text" name="Artist[section]" class="form-control"
+                                               value="{{ params.section }}" placeholder="Ex: div.div-horizontal2-list a">
                                     </div>
-                                    <div class="form-group col-sm-6">
-                                        <label>Lyric or Chord Section (Optional)</label>
-                                        <input type="text" name="Songs[lyric_section]" class="form-control"
-                                               value="{{ params.lyric_section }}" placeholder="Ex: span.lirik_line">
-                                        <p class="text-muted">Class or ID of the lyric area. Ex: span.lirik_line</p>
+                                    <div class="form-group col-sm-4">
+                                        <label>Song Section <span class="red">*</span></label>
+                                        <input type="text" name="Artist[song_section]" class="form-control"
+                                               value="{{ params.song_section }}" placeholder="Ex: ul#lyric-centerlist a">
                                     </div>
                                 </div>
                                 <div class="row">
@@ -111,19 +85,19 @@ Generate Lirik Lagu - {{ App.params.site_name }}
                                         <tr>
                                             <td>{{ i + 1 }}</td>
                                             <td>
-                                                {{ item.title }}
-                                                <input type="hidden" name="Songs[title][{{ i }}]" value="{{ item.title }}">
+                                                {{ item.name }}
+                                                <input type="hidden" name="Artist[name][{{ i }}]" value="{{ item.name }}">
                                             </td>
                                             <td>
                                                 <a href="{{ item.url }}" target="_newtab">{{ item.url }}</a>
-                                                <input type="hidden" name="Songs[song_url][{{ i }}]" value="{{ item.url }}">
+                                                <input type="hidden" name="Artist[song_url][{{ i }}]" value="{{ item.url }}">
                                             </td>
                                             <td>
                                                 <input type="checkbox" name="choose[{{ i }}]" class="action" checked="checked">
                                             </td>
                                         </tr>
                                         {% else %}
-                                        <tr class="no-data">
+                                        <tr>
                                             <td>No data founds</td>
                                         </tr>
                                         {% endfor %}
@@ -140,38 +114,40 @@ Generate Lirik Lagu - {{ App.params.site_name }}
                 <div class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Daftar Hasil Generate (Belum Dieksekusi)
+                            Daftar Hasil Generate (Belum Memiliki Lagu)
                         </div>
                         <div class="panel-body">
-                            {% if (songs | length) > 0 %}
+                            {% if (artists | length) > 0 %}
                             <div id="dt_basic_wrapper2" class="dataTables_wrapper form-inline no-footer table-responsive" role="grid">
                                 <table id="dt_basic2" class="table table-striped dataTable">
                                     <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th>Title</th>
+                                        <th>Name</th>
+                                        <th>Abjad</th>
                                         <th>Url</th>
                                         <th>&nbsp;</th>
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {% for i, song in songs %}
+                                    {% for i, artist in artists %}
                                     <tr>
                                         <td>{{ i + 1 }}</td>
                                         <td>
-                                            {{ song.title }}
+                                            {{ artist.name }}
+                                        </td>
+                                        <td>{{ artist.abjad }}</td>
+                                        <td>
+                                            <a href="{{ artist.song_url }}" target="_newtab">{{ artist.song_url }}</a>
                                         </td>
                                         <td>
-                                            <a href="{{ song.slug }}" target="_newtab">{{ song.slug }}</a>
-                                        </td>
-                                        <td>
-                                            <a href="{{ 'song/lyrics/delete-song' | link }}/{{ song.id }}" onclick="return hapus(this);">
+                                            <a href="{{ 'song/chords/delete-artist' | link }}/{{ artist.id }}" onclick="return hapus(this);">
                                                 <i class="fa fa-trash-o"></i>
                                             </a>
                                         </td>
                                     </tr>
                                     {% else %}
-                                    <tr>
+                                    <tr class="no-data">
                                         <td>No data founds</td>
                                     </tr>
                                     {% endfor %}
@@ -189,7 +165,6 @@ Generate Lirik Lagu - {{ App.params.site_name }}
 {% include 'partial/right_menu.html' %}
 {% endblock %}
 {% block endbodyjs %}
-<script src="{{ 'lib/select2/select2.min.js' | admin_asset_url }}"></script>
 <script src="{{ 'lib/DataTables/media/js/jquery.dataTables.min.js' | admin_asset_url }}"></script>
 <script src="{{ 'lib/DataTables/media/js/dataTables.bootstrap.js' | admin_asset_url }}"></script>
 <script type="text/javascript">
@@ -202,26 +177,6 @@ Generate Lirik Lagu - {{ App.params.site_name }}
             }
             return true;
         });
-        $('#song_url').val($("#artist-list").find('option:selected').attr("attr-url"));
-        $('#song_section').val($("#artist-list").find('option:selected').attr("attr-section"));
-        $("#artist-list").change(function(){
-            var element = $(this).find('option:selected');
-            var url = element.attr("attr-url");
-            var section = element.attr("attr-section");
-
-            $('#song_url').val(url);
-            $('#song_section').val(section);
-        });
-        $('select[id="abjad-list"]').change(function () {
-            var url = window.location.href.split('?')[0];
-            window.location.href = url + "?Songs[abjad_id]="+$(this).val();
-        });
-        if($('.select2-basic').length) {
-            $('.select2-basic').select2({
-                allowClear: true,
-                placeholder: "Pilih ..."
-            });
-        }
     });
     function hapus(data) {
         if (confirm('Are you sure to delete ?')) {

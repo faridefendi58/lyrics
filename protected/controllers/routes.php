@@ -144,3 +144,57 @@ $app->post('/tracking', function ($request, $response, $args) {
         exit;
     }
 });
+
+$app->post('/request-lagu', function ($request, $response, $args) {
+    $result = ['success' => 0, 'message' => 'Request Anda gagal dikirimkan.'];
+    $settings = $this->get('settings');
+    if (isset($_POST['Request'])){
+        if (empty($_POST['Request']['name'])
+            && empty($_POST['Request']['email'])
+            && empty($_POST['Request']['title'])
+            && empty($_POST['Request']['artist'])) {
+            $result['message'] = "Nama, email, judul lagu, dan nama penyanyi tidak boleh dikosongi";
+        }
+        if (!filter_var($_POST['Request']['email'], FILTER_VALIDATE_EMAIL)) {
+            $result['message'] = $_POST['Request']['email']." bukan alamat email yang valid";
+        }
+        //send mail to admin
+        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+        try {
+            //Server settings
+            $mail->SMTPDebug = 0;
+            $mail->isSMTP();
+            $mail->Host = $settings['params']['smtp_host'];
+            $mail->SMTPAuth = true;
+            $mail->Username = $settings['params']['admin_email_secondary'];
+            $mail->Password = $settings['params']['smtp_secret'];
+            $mail->SMTPSecure = $settings['params']['smtp_secure'];
+            $mail->Port = $settings['params']['smtp_port'];
+
+            //Recipients
+            $mail->setFrom( $settings['params']['admin_email_secondary'], 'Admin '.$settings['params']['site_name'] );
+            $mail->addAddress( $settings['params']['admin_email_secondary'], $settings['params']['admin_email_name'] );
+            $mail->addReplyTo( $_POST['Request']['email'], $_POST['Request']['name'] );
+
+            //Content
+            $mail->isHTML(true);
+            $mail->Subject = '['.$settings['params']['site_name'].'] Request '.ucfirst($_POST['Request']['type']);
+            $mail->Body = "Halo ".$settings['params']['admin_email_name'].", 
+	        <br/><br/>
+            Ada request ".ucfirst($_POST['Request']['type'])." baru dari pengunjung dengan data berikut:
+            <br/><br/>
+            <b>Judul Lagu</b> : ".$_POST['Request']['title']." <br/>
+            <b>Nama Penyanyi</b> : ".$_POST['Request']['artist']." <br/> 
+            <b>Direquest oleh</b> : ".$_POST['Request']['name']." - ".$_POST['Request']['email'];
+
+            $mail->send();
+        } catch (Exception $e) {
+            $result['message'] = 'Message could not be sent. Mailer Error: ' . $mail->ErrorInfo;
+        }
+
+        $result['success'] = 1;
+        $result['message'] = 'Request Anda berhasil dikirim. Kami akan segera menindaklanjuti permintaan Anda.';
+    }
+
+    return $response->withJson($result);
+});

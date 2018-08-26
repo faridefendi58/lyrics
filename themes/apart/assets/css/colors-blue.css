@@ -175,7 +175,8 @@ html.no-pointerevents.no-touchevents .list-agency:hover .list-agency-right,html.
 .price-table-ul li:last-child,li.ap-submenu{border-bottom:none}
 @media only screen and (max-width:991px){.sidebar,.sidebar-left{background:#f8f8f8}
 }
-@media only screen and (max-width:767px){header.header2 .navbar-collapse,header.header3 .navbar-collapse{background:#fff;color:#5d5d5d}
+@media only screen and (max-width:767px){
+    header.header2 .navbar-collapse,header.header3 .navbar-collapse{background:#fff;color:#5d5d5d}
     header.header2 .navbar-nav>li>a,header.header3 .navbar-nav>li>a{color:#5d5d5d}
     header.header2 .navbar-nav>li>a:hover,header.header3 .navbar-nav>li>a:hover{color:#fff;background:#00ca9b}
     .dropdown-menu a,.dropdown-submenu a,a.hover-menu{background:#f8f8f8}
@@ -185,6 +186,12 @@ html.no-pointerevents.no-touchevents .list-agency:hover .list-agency-right,html.
     .simple-search-cont{background:#1a2633}
     .list-offer-right,.list-offer-right-large{border-width:0}
     .list-offer{border:1px solid #eaeaea}
+    header.header2 nav.navbar {background-color: #1b2835;}
+    header.header2 nav.navbar .navbar-toggle {background: none !important;}
+    header.header2 nav.navbar .navbar-toggle .icon-bar {background:#fff;}
+    header.header2.sticky .navbar-nav, header.header2 .navbar-nav {margin:0px -15px;}
+    header.header2.sticky .navbar-nav>li, header.header2 .navbar-nav>li {border-bottom: 1px solid #d0d0d0;}
+    header.header2.sticky .navbar-nav>li>a, header.header2 .navbar-nav>li>a {padding:10px;margin-bottom:0px;margin-top: 0px;}
 }
 @media only screen and (min-width:768px){
     header.header2.sticky,header.header3.sticky{background:#1B2835}
@@ -198,4 +205,7 @@ html.no-pointerevents.no-touchevents .list-agency:hover .list-agency-right,html.
     header.header2.sticky .navbar-nav>li, header.header2 .navbar-nav>li {border-bottom: 1px solid #d0d0d0;}
     header.header2.sticky .navbar-nav>li>a, header.header2 .navbar-nav>li>a {padding:10px;margin-bottom:0px;margin-top: 0px;}
     .simple-search-cont .bootstrap-select:not([class*=col-]):not([class*=form-control]):not(.input-group-btn), .simple-search-cont .cs-select {  left: 0px;}
+    .simple-search-form .mobile-device {height: 0px !important;}
+    .simple-search-cont .button-primary {top: 211px;}
+    .simple-search-cont {height: 180px;}
 }

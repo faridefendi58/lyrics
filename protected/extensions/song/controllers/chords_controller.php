@@ -4,7 +4,7 @@ namespace Extensions\Controllers;
 
 use Components\BaseController as BaseController;
 
-class LyricsController extends BaseController
+class ChordsController extends BaseController
 {
     public function __construct($app, $user)
     {
@@ -24,6 +24,7 @@ class LyricsController extends BaseController
         $app->map(['GET', 'POST'], '/scrap/[{id}]', [$this, 'scrap']);
         $app->map(['GET', 'POST'], '/generate-artist', [$this, 'generate_artist']);
         $app->map(['GET', 'POST'], '/generate-song', [$this, 'generate_song']);
+        $app->map(['GET', 'POST'], '/generate-lyric', [$this, 'generate_lyric']);
         $app->map(['POST'], '/delete-artist/[{id}]', [$this, 'delete_artist']);
         $app->map(['POST'], '/delete-song/[{id}]', [$this, 'delete_song']);
         $app->map(['GET', 'POST'], '/scraping-job/[{limit}]', [$this, 'scraping_job']);
@@ -54,10 +55,12 @@ class LyricsController extends BaseController
         }
 
         $model = new \ExtensionsModel\SongModel();
-        $need_approvals = $model->getSongs(['status_lyric' => \ExtensionsModel\SongLyricRefferenceModel::STATUS_EXECUTED]);
-        $approveds = $model->getSongs(['status_lyric' => \ExtensionsModel\SongLyricRefferenceModel::STATUS_APPROVED]);
+        $need_approvals = $model->getSongs([
+            'status_chord' => \ExtensionsModel\SongCordRefferenceModel::STATUS_EXECUTED]);
+        $approveds = $model->getSongs([
+            'status_chord' => \ExtensionsModel\SongCordRefferenceModel::STATUS_APPROVED]);
 
-        return $this->_container->module->render($response, 'songs/view_lyric.html', [
+        return $this->_container->module->render($response, 'songs/view_chord.html', [
             'need_approvals' => $need_approvals,
             'approveds' => $approveds,
             'model' => $model
@@ -108,7 +111,7 @@ class LyricsController extends BaseController
             }
         }
 
-        return $this->_container->module->render($response, 'songs/create_lyric.html', [
+        return $this->_container->module->render($response, 'songs/create_chord.html', [
             'status_list' => $model->getListStatus(),
             'model' => $model,
             'artists' => $artists,
@@ -160,18 +163,18 @@ class LyricsController extends BaseController
             $model->updated_at = date('Y-m-d H:i:s');
             $update = \ExtensionsModel\SongModel::model()->update($model);
             if ($update) {
-                $model2 = \ExtensionsModel\SongLyricRefferenceModel::model()->findByAttributes(['song_id' => $model->id]);
+                $model2 = \ExtensionsModel\SongCordRefferenceModel::model()->findByAttributes(['song_id' => $model->id]);
                 $model2->url = $_POST['Songs']['refference_url'];
                 $model2->section = $_POST['Songs']['refference_section'];
                 if (isset($_POST['Songs']['content']) && !empty($_POST['Songs']['content'])) {
                     $model2->result = $_POST['Songs']['content'];
                 }
                 if ($model->status == \ExtensionsModel\SongModel::STATUS_PUBLISHED) {
-                    $model2->status = \ExtensionsModel\SongLyricRefferenceModel::STATUS_APPROVED;
+                    $model2->status = \ExtensionsModel\SongCordRefferenceModel::STATUS_APPROVED;
                     $model2->approved_at = date("Y-m-d H:i:s");
                 }
                 $model2->updated_at = date('Y-m-d H:i:s');
-                $update2 = \ExtensionsModel\SongLyricRefferenceModel::model()->update($model2);
+                $update2 = \ExtensionsModel\SongCordRefferenceModel::model()->update($model2);
 
                 if ($update2) {
                     $song_detail = $smodel->getSongDetail($model->id);
@@ -184,7 +187,7 @@ class LyricsController extends BaseController
             }
         }
 
-        return $this->_container->module->render($response, 'songs/update_lyric.html', [
+        return $this->_container->module->render($response, 'songs/update_chord.html', [
             'status_list' => $smodel->getListStatus(),
             'artists' => $artists,
             'genres' => $genres,
@@ -232,34 +235,6 @@ class LyricsController extends BaseController
         return $model->createSlug($_POST['title']);
     }
 
-    /**
-     * Direct upload image on the content of post
-     * @param $request
-     * @param $response
-     * @param $args
-     * @return mixed
-     */
-    public function get_direct_upload($request, $response, $args)
-    {
-        if ($this->_user->isGuest()){
-            return $response->withRedirect($this->_login_url);
-        }
-
-        if (isset($_FILES['file']['name'])) {
-            $path_info = pathinfo($_FILES['file']['name']);
-            if (!in_array($path_info['extension'], ['jpg','JPG','jpeg','JPEG','png','PNG'])) {
-                return $response->withJson('Tipe dokumen yang diperbolehkan hanya jpg, jpeg, dan png');
-            }
-
-            $uploadfile = 'uploads/songs/' . time().'.'.$path_info['extension'];
-            move_uploaded_file($_FILES['file']['tmp_name'], $uploadfile);
-
-            return $response->withJson(['location' => $this->getBaseUrl($request).'/'.$uploadfile]);
-        }
-
-        return $response->withJson('Terjadi kegagalan saat mengunggah dokumen.');
-    }
-
     public function scraping_task($request, $response, $args)
     {
         $isAllowed = $this->isAllowed($request, $response);
@@ -271,9 +246,9 @@ class LyricsController extends BaseController
         }
 
         $model = new \ExtensionsModel\SongModel();
-        $songs = $model->getSongs(['status_lyric' => \ExtensionsModel\SongLyricRefferenceModel::STATUS_PENDING]);
+        $songs = $model->getSongs(['status_chord' => \ExtensionsModel\SongCordRefferenceModel::STATUS_PENDING]);
 
-        return $this->_container->module->render($response, 'songs/scraping_task_lyric.html', [
+        return $this->_container->module->render($response, 'songs/scraping_task_chord.html', [
             'songs' => $songs
         ]);
     }
@@ -293,20 +268,19 @@ class LyricsController extends BaseController
 
         $result = null;
         $model = \ExtensionsModel\SongModel::model()->findByPk($args['id']);
-        if ($model instanceof \RedBeanPHP\OODBBean
-            && $model->status == \ExtensionsModel\SongModel::STATUS_DRAFT) {
+        if ($model instanceof \RedBeanPHP\OODBBean) {
             $result = $this->_scrap_execute(['id' => $args['id']]);
         }
 
         $ret = [ 'success' => 0 ];
         if (!empty($result)) {
-            $lrmodel = \ExtensionsModel\SongLyricRefferenceModel::model()->findByAttributes(['song_id' => $args['id']]);
+            $lrmodel = \ExtensionsModel\SongCordRefferenceModel::model()->findByAttributes(['song_id' => $args['id']]);
             if ($lrmodel instanceof \RedBeanPHP\OODBBean) {
                 $lrmodel->result = $result;
-                $lrmodel->status = \ExtensionsModel\SongLyricRefferenceModel::STATUS_EXECUTED;
+                $lrmodel->status = \ExtensionsModel\SongCordRefferenceModel::STATUS_EXECUTED;
                 $lrmodel->executed_at = date("Y-m-d H:i:s");
                 $lrmodel->updated_at = date("Y-m-d H:i:s");
-                $update = \ExtensionsModel\SongLyricRefferenceModel::model()->update($lrmodel);
+                $update = \ExtensionsModel\SongCordRefferenceModel::model()->update($lrmodel);
                 if ($update) {
                     $ret['success'] = 1;
                 }
@@ -321,25 +295,48 @@ class LyricsController extends BaseController
      * @param $id
      */
     private function _scrap_execute($params) {
-        if (!isset($params['lyric_url']) && !isset($params['lyric_section'])) {
+        if (!isset($params['chord_url']) && !isset($params['chord_section'])) {
             $smodel = new \ExtensionsModel\SongModel();
             $data = $smodel->getSongDetail($params['id']);
-            $params['lyric_url'] = $data['lyric_url'];
-            $params['lyric_section'] = $data['lyric_section'];
+            $params['chord_url'] = $data['chord_url'];
+            $params['chord_section'] = $data['chord_section'];
         }
 
         // create HTML DOM
-        $html = file_get_html($params['lyric_url']);
+        $html = file_get_html($params['chord_url']);
 
         $lyrics = '';
-        foreach($html->find($params['lyric_section']) as $div) {
-            $lyrics .= $div->plaintext."<br/>";
+        foreach($html->find($params['chord_section']) as $div) {
+            $links = $div->find('a');
+            foreach ($links as $link) {
+                $link->href = "#";
+            }
+            //remove div if any
+            if (strpos($div->innertext, "<div") != false) {
+                $divs = $div->find('div');
+                foreach ($divs as $div) {
+                    $div->outhertext = "";
+                }
+            }
+            $lyrics .= $div->innertext."<br/>";
         }
 
-        /*$result = trim(str_replace("\t", '', $result));
-        $result = str_replace("\r", '', $result);
-        $result = nl2br($result);
-        $result = str_replace("\n", '', $result);*/
+        /*if (strpos($lyrics, "<div") != false) {
+            $lyrics = preg_replace('#(<div.*?>).*?(</div>)#', '$1$2', $lyrics);
+        }*/
+        $lyrics = preg_replace('#(<h.*?>).*?(</h.*?>)#', '$1$2', $lyrics);
+        if (strpos($lyrics, "<p") !=false) {
+            $lyrics = preg_replace('#(<p.*?>).*?(</p>)#', '$1$2', $lyrics);
+        }
+        if (strpos($lyrics, "<label") !=false) {
+            $lyrics = preg_replace('#(<label.*?>).*?(</label>)#', '$1$2', $lyrics);
+        }
+        if (strpos($lyrics, "<button") !=false) {
+            $lyrics = preg_replace('#(<button.*?>).*?(</button>)#', '$1$2', $lyrics);
+        }
+        $lyrics = str_replace(['showTip', 'reff'], ['chord', 'Reff'], $lyrics);
+
+        $lyrics = strip_tags($lyrics, '<a><br/><br>');
 
         $html->clear();
         unset($html);
@@ -383,8 +380,8 @@ class LyricsController extends BaseController
                         $model->name = $params['Artist']['name'][$i];
                         $model->slug = $smodel->createSlug($model->name);
                         if (!in_array($model->slug, $artist_slugs)) {
-                            $model->song_url = $params['Artist']['song_url'][$i];
-                            $model->song_section = $params['Artist']['song_section'];
+                            $model->chord_url = $params['Artist']['song_url'][$i];
+                            $model->chord_section = $params['Artist']['song_section'];
                             $model->abjad_id = array_search (substr(ucwords($model->name), 0, 1), $alphabets);
                             $model->created_at = date("Y-m-d H:i:s");
                             $model->updated_at = date("Y-m-d H:i:s");
@@ -403,7 +400,7 @@ class LyricsController extends BaseController
             }
         }
 
-        return $this->_container->module->render($response, 'songs/generate_artist.html', [
+        return $this->_container->module->render($response, 'songs/generate_artist_chord.html', [
             'params' => $params['Artist'],
             'items' => $items,
             'artists' => $samodel->getGenerateResults(),
@@ -464,11 +461,32 @@ class LyricsController extends BaseController
         $message = null; $success = false;
         if (isset($params['Songs'])) {
             if ($params['Submit'] == 'Generate') {
-                $html = file_get_html($params['Songs']['url']);
-
+                $html = file_get_html($params['Songs']['src_website']);
                 foreach($html->find($params['Songs']['section']) as $i => $div) {
                     $title = $div->plaintext;
-                    array_push($items, ['title' => $title, 'url' => $div->href]);
+                    if (isset($params['Songs']['use_slug_as_title'])
+                        && $params['Songs']['use_slug_as_title'] == 'on') {
+                        $pecah = explode("/", $div->href);
+                        if (count($pecah) > 0) {
+                            $last_char = $pecah[count($pecah) - 1];
+                            if (strpos($last_char, ".")) {
+                                $last_char = explode(".", $last_char)[0];
+                            }
+                            $title = $last_char;
+                            if (strpos($title, "-")) {
+                                $title = str_replace("-"," ", $title);
+                            }
+                            $title = ucwords(preg_replace("/[^[:alnum:][:space:]]/u", '', $title));
+                        }
+                    }
+                    if (isset($params['Songs']['filter_content'])) {
+                        if (strpos(strtolower($title), strtolower($params['Songs']['filter_content'])) != false
+                            || strpos(strtolower($div->href), strtolower($params['Songs']['filter_content'])) != false) {
+                            array_push($items, ['title' => $title, 'url' => $div->href]);
+                        }
+                    } else {
+                        array_push($items, ['title' => $title, 'url' => $div->href]);
+                    }
                 }
                 $html->clear();
                 unset($html);
@@ -487,15 +505,40 @@ class LyricsController extends BaseController
                             $song = \ExtensionsModel\SongModel::model();
                             $save = $song->save(@$model);
                             if ($save > 0) {
-                                $model2 = new \ExtensionsModel\SongLyricRefferenceModel('create');
+                                $model2 = new \ExtensionsModel\SongCordRefferenceModel('create');
                                 $model2->song_id = $model->id;
                                 $model2->url = $params['Songs']['song_url'][$i];
-                                $model2->section = $params['Songs']['lyric_section'];
+                                $model2->section = $params['Songs']['chord_section'];
                                 $model2->created_at = date("Y-m-d H:i:s");
                                 $model2->updated_at = date("Y-m-d H:i:s");
-                                $save2 = \ExtensionsModel\SongLyricRefferenceModel::model()->save(@$model2);
-                                if ($save2 > 0)
+                                $save2 = \ExtensionsModel\SongCordRefferenceModel::model()->save(@$model2);
+                                if ($save2 > 0) {
+                                    $model3 = \ExtensionsModel\SongArtistModel::model()->findByPk($model->artist_id);
+                                    if ($model3 instanceof \RedBeanPHP\OODBBean) {
+                                        $model3->chord_url = $params['Songs']['src_website'];
+                                        $model3->chord_section = $params['Songs']['section'];
+                                        $model3->updated_at = date("Y-m-d H:i:s");
+                                        $update3 = \ExtensionsModel\SongArtistModel::model()->update($model3);
+                                    }
                                     $counter = $counter + 1;
+                                }
+                            }
+                        } else {
+                            $slug = $smodel->createSlug($params['Songs']['title'][$i]);
+                            $model = \ExtensionsModel\SongModel::model()->findByAttributes(['slug' => $slug]);
+                            if ($model instanceof \RedBeanPHP\OODBBean) {
+                                $model2 = \ExtensionsModel\SongCordRefferenceModel::model()->findByAttributes(['song_id' => $model->id]);
+                                if (!$model2 instanceof \RedBeanPHP\OODBBean) {
+                                    $model2 = new \ExtensionsModel\SongCordRefferenceModel('create');
+                                    $model2->song_id = $model->id;
+                                    $model2->url = $params['Songs']['song_url'][$i];
+                                    $model2->section = $params['Songs']['chord_section'];
+                                    $model2->created_at = date("Y-m-d H:i:s");
+                                    $model2->updated_at = date("Y-m-d H:i:s");
+                                    $save2 = \ExtensionsModel\SongCordRefferenceModel::model()->save(@$model2);
+                                    if ($save2 > 0)
+                                        $counter = $counter + 1;
+                                }
                             }
                         }
                     }
@@ -512,12 +555,13 @@ class LyricsController extends BaseController
             $song_artist_params['abjad_id'] = $params['Songs']['abjad_id'];
         }
 
-        return $this->_container->module->render($response, 'songs/generate_song.html', [
+        return $this->_container->module->render($response, 'songs/generate_song_chord.html', [
             'params' => $params['Songs'],
             'items' => $items,
             'artists' => $samodel->getGenerateResults($song_artist_params),
             'songs' => $smodel->getGenerateResults(),
             'smodel' => $smodel,
+            'use_for_chord' => true,
             'message' => ($message) ? $message : null,
             'success' => $success,
         ]);
@@ -576,7 +620,7 @@ class LyricsController extends BaseController
         $smodel = new \ExtensionsModel\SongModel();
         $items = $smodel->getSongs([
             'limit' => $args['limit'],
-            'status_lyric' => \ExtensionsModel\SongLyricRefferenceModel::STATUS_PENDING,
+            'status_chord' => \ExtensionsModel\SongCordRefferenceModel::STATUS_PENDING,
             'status' => \ExtensionsModel\SongModel::STATUS_DRAFT
         ]);
 
@@ -584,18 +628,18 @@ class LyricsController extends BaseController
         if (is_array($items) && count($items) > 0) {
             foreach ($items as $item) {
                 $params = [
-                    'lyric_url' => $item['lyric_src_url'],
-                    'lyric_section' => $item['lyric_section']
+                    'chord_url' => $item['chord_src_url'],
+                    'chord_section' => $item['chord_section']
                 ];
                 $result = $this->_scrap_execute($params);
                 if (!empty($result)) {
-                    $lrmodel = \ExtensionsModel\SongLyricRefferenceModel::model()->findByAttributes(['song_id' => $item['id']]);
+                    $lrmodel = \ExtensionsModel\SongCordRefferenceModel::model()->findByAttributes(['song_id' => $item['id']]);
                     if ($lrmodel instanceof \RedBeanPHP\OODBBean) {
                         $lrmodel->result = $result;
-                        $lrmodel->status = \ExtensionsModel\SongLyricRefferenceModel::STATUS_EXECUTED;
+                        $lrmodel->status = \ExtensionsModel\SongCordRefferenceModel::STATUS_EXECUTED;
                         $lrmodel->executed_at = date("Y-m-d H:i:s");
                         $lrmodel->updated_at = date("Y-m-d H:i:s");
-                        $update = \ExtensionsModel\SongLyricRefferenceModel::model()->update($lrmodel);
+                        $update = \ExtensionsModel\SongCordRefferenceModel::model()->update($lrmodel);
                         if ($update) {
                             array_push($success, $item['id']);
                         }
@@ -605,5 +649,47 @@ class LyricsController extends BaseController
         }
 
         return $response->withJson($success);
+    }
+
+    public function generate_lyric($request, $response, $args)
+    {
+        $isAllowed = $this->isAllowed($request, $response);
+        if ($isAllowed instanceof \Slim\Http\Response)
+            return $isAllowed;
+
+        if (!$isAllowed) {
+            return $this->notAllowedAction();
+        }
+
+        $params = $request->getParams();
+        $model = \ExtensionsModel\SongCordRefferenceModel::model()->findByAttributes(['song_id' => $params['song_id']]);
+        $results = ['status' => 0];
+        if ($model instanceof \RedBeanPHP\OODBBean) {
+            $slmodel = \ExtensionsModel\SongLyricRefferenceModel::model()->findByAttributes(['song_id' => $params['song_id']]);
+            if (!$slmodel instanceof \RedBeanPHP\OODBBean) {
+                $lmodel = new \ExtensionsModel\SongLyricRefferenceModel('create');
+                $lmodel->song_id = $params['song_id'];
+                $lmodel->url = $model->url;
+                $lmodel->section = $model->section;
+                if (strpos($model->result, "<a") !=false) {
+                    $model->result = preg_replace('#(<a.*?>).*?(</a>)#', '$1$2', $model->result);
+                    $model->result = str_replace("&nbsp;"," ", $model->result);
+                }
+                $lmodel->result = html_entity_decode(strip_tags($model->result, '<p><br/><br>'));
+                $lmodel->status = $model->status;
+                $lmodel->executed_at = date("Y-m-d H:i:s");
+                $lmodel->created_at = date("Y-m-d H:i:s");
+                $lmodel->updated_at = date("Y-m-d H:i:s");
+                $save = \ExtensionsModel\SongLyricRefferenceModel::model()->save(@$lmodel);
+                if ($save > 0) {
+                    $results['status'] = 1;
+                    $results['message'] = "The lyrics has been successfully generated.";
+                } else {
+                    $results['message'] = \Model\SongLyricRefferenceModel::model()->getErrors(false);;
+                }
+            }
+        }
+
+        return $response->withJson($results);;
     }
 }

@@ -3,6 +3,10 @@
 Perbarui Lirik - {{ App.params.site_name }}
 {% endblock %}
 
+{% block extended_css %}
+<link rel="stylesheet" href="{{ 'lib/select2/select2.css' | admin_asset_url }}">
+{% endblock %}
+
 {% block content %}
 <link rel="stylesheet" href="{{ 'css/bootstrap-fileupload.min.css' | admin_asset_url }}" />
 <div id="main_wrapper">
@@ -38,6 +42,7 @@ Perbarui Lirik - {{ App.params.site_name }}
 {% include 'partial/right_menu.html' %}
 {% endblock %}
 {% block endbodyjs %}
+<script src="{{ 'lib/select2/select2.min.js' | admin_asset_url }}"></script>
 <script src="{{ 'js/bootstrap-fileupload.min.js' | admin_asset_url }}"></script>
 <script type="text/javascript" src="{{ 'lib/tinymce/tinymce.min.js' | admin_asset_url }}"></script>
 <script type="text/javascript">
@@ -102,6 +107,15 @@ Perbarui Lirik - {{ App.params.site_name }}
             setTimeout(function () {
                 window.location.href = "{{ 'song/lyrics/update' | link }}/{{ song.id }}";
             }, 2000);
+        }
+        if($('.select2-basic').length) {
+            $('.select2-basic').select2({
+                allowClear: true,
+                placeholder: "Pilih ..."
+            });
+            $('select[id="select-artist"]').val("{{ song.artist_id }}").trigger("change");
+            $('input[id="song-url"]').val('{{ song.lyric_url }}');
+            $('input[id="refference-section"]').val('{{ song.lyric_section }}');
         }
     });
     function getSlug(data){

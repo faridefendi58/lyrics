@@ -63,8 +63,8 @@ class SongModel extends \Model\BaseModel
     }
 
     public function getSongs($data) {
-        $sql = "SELECT t.*, a.title AS abjad_name, s.name AS artist_name, s.slug AS artist_slug, g.title AS genre_name, 
-        l.url AS lyric_src_url, l.result AS lyric, l.status AS lyric_status, l.section AS lyric_section,
+        $sql = "SELECT t.*, a.title AS abjad_name, s.name AS artist_name, s.slug AS artist_slug, s.song_url, s.song_section, 
+        g.id AS genre_id, g.title AS genre_name, l.url AS lyric_src_url, l.result AS lyric, l.status AS lyric_status, l.section AS lyric_section,
         c.url AS chord_src_url, c.result AS chord, c.status AS chord_status, c.section AS chord_section  
         FROM {tablePrefix}ext_song t 
         LEFT JOIN {tablePrefix}ext_song_artists s ON s.id = t.artist_id 
@@ -87,9 +87,31 @@ class SongModel extends \Model\BaseModel
             $params['status_lyric'] = $data['status_lyric'];
         }
 
+        if (isset($data['status_chord'])) {
+            $sql .= ' AND c.status =:status_chord';
+            $params['status_chord'] = $data['status_chord'];
+        }
+
         if (isset($data['artist_id'])) {
             $sql .= ' AND t.artist_id =:artist_id';
             $params['artist_id'] = $data['artist_id'];
+        }
+
+        if (isset($data['type'])) {
+            if ($data['type'] == 'lyric') {
+                $sql .= ' AND l.result IS NOT NULL';
+            }
+            if ($data['type'] == 'chord') {
+                $sql .= ' AND c.result IS NOT NULL';
+            }
+        }
+
+        if (isset($data['featured'])) {
+            if (isset($data['type']) && $data['type'] == 'chord') {
+                $sql .= ' AND c.featured = 1';
+            } else {
+                $sql .= ' AND l.featured = 1';
+            }
         }
 
         if (isset($data['order_by'])) {
@@ -108,8 +130,8 @@ class SongModel extends \Model\BaseModel
 
     public function getSong($slug)
     {
-        $sql = "SELECT t.*, a.title AS abjad_name, s.name AS artist_name, g.title AS genre_name, 
-        l.result AS lyric, l.status AS lyric_status, 
+        $sql = "SELECT t.*, a.title AS abjad_name, s.name AS artist_name, s.slug AS artist_slug, 
+        g.title AS genre_name, l.result AS lyric, l.status AS lyric_status, 
         c.result AS chord, c.status AS chord_status    
         FROM {tablePrefix}ext_song t 
         LEFT JOIN {tablePrefix}ext_song_artists s ON s.id = t.artist_id 
@@ -247,14 +269,14 @@ class SongModel extends \Model\BaseModel
                 FROM {tablePrefix}ext_song t 
                 LEFT JOIN {tablePrefix}ext_song_artists s ON s.id = t.artist_id 
                 LEFT JOIN {tablePrefix}ext_song_lyric_refferences l ON l.song_id = t.id 
-                WHERE t.status=:status";
+                WHERE t.status=:status l.id IS NOT NULL";
             } elseif ($data['type'] == 'chord') {
                 $sql = "SELECT t.*, s.name AS artist_name, s.slug AS artist_slug, 
                 c.result AS chord   
                 FROM {tablePrefix}ext_song t 
                 LEFT JOIN {tablePrefix}ext_song_artists s ON s.id = t.artist_id  
                 LEFT JOIN {tablePrefix}ext_song_chord_refferences c ON c.song_id = t.id 
-                WHERE t.status=:status";
+                WHERE t.status=:status AND c.id IS NOT NULL";
             }
         }
 
@@ -297,12 +319,17 @@ class SongModel extends \Model\BaseModel
         $sql = "SELECT t.name AS artist_name, t.slug AS artist_slug, COUNT(s.id) AS tot_song  
           FROM {tablePrefix}ext_song s 
           LEFT JOIN {tablePrefix}ext_song_artists t ON t.id = s.artist_id 
+          LEFT JOIN {tablePrefix}ext_song_chord_refferences c ON c.song_id = s.id 
           WHERE 1";
 
         $params = [];
         if ($data['abjad_id']) {
             $sql .= ' AND t.abjad_id =:abjad_id';
             $params['abjad_id'] = $data['abjad_id'];
+        }
+
+        if ($data['has_chord']) {
+            $sql .= ' AND c.id IS NOT NULL';
         }
 
         $sql .= ' GROUP BY s.artist_id';
@@ -316,5 +343,120 @@ class SongModel extends \Model\BaseModel
         $rows = \Model\R::getAll( $sql, $params );
 
         return $rows;
+    }
+
+    /**
+     * List song title with singer name
+     * @param $data
+     * @return array
+     */
+    public function getSongsWithArtist($data) {
+        $rows = self::getSongs($data);
+        $items = [];
+        if (is_array($rows) && count($rows)>0) {
+            foreach ($rows as $i => $row) {
+                $items[$row['artist_name']][] = $row;
+            }
+        }
+
+        return $items;
+    }
+
+    public function getRelateds($data) {
+        if (!empty($data['song_id']) && !empty($data['type'])) {
+            $sql = '';
+            if ($data['type'] == 'chord') {
+                $sql .= "SELECT t.*, s.title, s.slug, 
+                a.name AS artist_name, a.slug AS artist_slug, s.published_at   
+                FROM {tablePrefix}ext_song_chord_refferences t 
+                LEFT JOIN {tablePrefix}ext_song s ON s.id = t.song_id
+                LEFT JOIN {tablePrefix}ext_song_artists a ON a.id = s.artist_id";
+            } elseif ($data['type'] == 'lyric') {
+                $sql .= "SELECT t.*, s.title, s.slug, 
+                a.name AS artist_name, a.slug AS artist_slug, s.published_at 
+                FROM {tablePrefix}ext_song_lyric_refferences t 
+                LEFT JOIN {tablePrefix}ext_song s ON s.id = t.song_id
+                LEFT JOIN {tablePrefix}ext_song_artists a ON a.id = s.artist_id";
+            }
+
+            $sql .= " WHERE t.song_id <>:song_id 
+                AND t.status =:approved 
+                AND s.artist_id =:artist_id AND s.status =:song_status";
+            $sql .= " ORDER BY t.created_at DESC";
+
+            $params = [
+                'song_id' => $data['song_id'],
+                'approved' => \ExtensionsModel\SongLyricRefferenceModel::STATUS_APPROVED,
+                'artist_id' => $data['artist_id'],
+                'song_status' => \ExtensionsModel\SongModel::STATUS_PUBLISHED
+            ];
+            $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+            $rows = \Model\R::getAll( $sql, $params );
+
+            return $rows;
+        }
+
+        return false;
+    }
+
+    public function getStatistic($data) {
+        if (isset($data['type'])) {
+            switch ($data['type']) {
+                case 'lyric_published_counter':
+                    $sql = "SELECT COUNT(t.id) AS counter   
+                    FROM {tablePrefix}ext_song_lyric_refferences t  
+                    LEFT JOIN {tablePrefix}ext_song s ON s.id = t.song_id 
+                    WHERE s.status =:status";
+
+                    $params = ['status' => \ExtensionsModel\SongModel::STATUS_PUBLISHED];
+                    break;
+                case 'chord_published_counter':
+                    $sql = "SELECT COUNT(t.id) AS counter   
+                    FROM {tablePrefix}ext_song_chord_refferences t  
+                    LEFT JOIN {tablePrefix}ext_song s ON s.id = t.song_id 
+                    WHERE s.status =:status";
+
+                    $params = ['status' => \ExtensionsModel\SongModel::STATUS_PUBLISHED];
+                    break;
+                case 'total_artist':
+                    $sql = "SELECT COUNT(t.id) AS counter   
+                    FROM {tablePrefix}ext_song_artists t  
+                    LEFT JOIN {tablePrefix}ext_song s ON s.artist_id = t.id 
+                    WHERE s.status =:status GROUP BY t.id";
+
+                    $params = ['status' => \ExtensionsModel\SongModel::STATUS_PUBLISHED];
+                    break;
+                case 'total_published_song':
+                    $sql = "SELECT COUNT(t.id) AS counter   
+                    FROM {tablePrefix}ext_song t 
+                    WHERE t.status =:status";
+
+                    $params = ['status' => \ExtensionsModel\SongModel::STATUS_PUBLISHED];
+                    break;
+            }
+            $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+            $row = \Model\R::getRow( $sql, $params );
+
+            return $row['counter'];
+        }
+
+        return false;
+    }
+
+    public function getVisitorBySegment($data) {
+        if (isset($data['type'])) {
+            $sql = "SELECT COUNT(t.id) AS counter   
+            FROM {tablePrefix}visitor t 
+            WHERE t.url LIKE '%".$data['type']."%'";
+
+            $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+            $row = \Model\R::getRow( $sql);
+
+            return $row['counter'];
+        }
+        return 0;
     }
 }

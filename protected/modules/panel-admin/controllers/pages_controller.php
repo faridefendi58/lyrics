@@ -99,7 +99,7 @@ class PagesController extends BaseController
                     return $response->withRedirect('/panel-admin/pages/inspiration/'.$_POST['Page']['permalink']);
                 }
 
-                array_push( $message, 'Halaman Anda telah berhasil disimpan.' );
+                $message = 'Halaman Anda telah berhasil disimpan.';
                 $success = true;
             } else {
                 if (count($message) == 0)

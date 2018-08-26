@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block pagetitle %}
-Generate Lirik Lagu - {{ App.params.site_name }}
+Generate Judul Lagu - Kord Gitar - {{ App.params.site_name }}
 {% endblock %}
 
 {% block extended_css %}
@@ -12,23 +12,23 @@ Generate Lirik Lagu - {{ App.params.site_name }}
     <div class="page_bar clearfix">
         <div class="row">
             <div class="col-sm-5">
-                <h1 class="page_title">Generate Lirik Lagu</h1>
-                <p class="text-muted">Formulir penambahan data lirik lagu</p>
+                <h1 class="page_title">Generate Judul Lagu</h1>
+                <p class="text-muted">Formulir penambahan data judul lagu untuk kord gitar</p>
             </div>
             <div class="col-sm-7 text-right">
                 <ul class="navbar-nav pull-right" style="list-style-type: none;">
                     <li class="nav-item" itemprop="url">
-                        <a href="{{ 'song/lyrics/view' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
-                            Daftar Lirik Lagu
+                        <a href="{{ 'song/chords/view' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                            Daftar Kord Gitar
                         </a>
                     </li>
                     <li class="nav-item" itemprop="url">
-                        <a href="{{ 'song/lyrics/scraping-task' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                        <a href="{{ 'song/chords/scraping-task' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
                             Daftar Scraping Task
                         </a>
                     </li>
                     <li class="nav-item" itemprop="url">
-                        <a href="{{ 'song/lyrics/generate-song' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                        <a href="{{ 'song/chords/generate-song' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
                             Generate Judul Lagu
                         </a>
                     </li>
@@ -65,26 +65,40 @@ Generate Lirik Lagu - {{ App.params.site_name }}
                                         <select name="Songs[artist_id]" class="form-control select2-basic" id="artist-list">
                                             {% for artist in artists %}
                                             <option value="{{ artist.id }}"
-                                                    attr-url="{% if not use_for_chord %}{{ artist.song_url }}{% else %}{{ artist.chord_url }}{% endif %}"
-                                                    attr-section="{% if use_for_chord %}{{ artist.chord_url }}{% else %}{{ artist.song_section }}{% endif %}"
+                                                    attr-url="{{ artist.chord_url }}"
+                                                    attr-section="{{ artist.chord_section }}"
                                                     {% if params.artist_id == artist.id %}selected{% endif %}>{{ artist.name }} ({{ artist.tot_song }} song)</option>
                                             {% endfor %}
                                         </select>
                                     </div>
                                     <div class="form-group col-sm-5">
-                                        <label>Url <span class="red">*</span></label>
-                                        <input type="text" name="Songs[url]" class="form-control" value="{{ params.url }}" id="song_url">
+                                        <label>Source Website <span class="red">*</span></label>
+                                        <input type="text" name="Songs[src_website]" class="form-control" value="{{ params.src_website }}" id="song_url">
                                     </div>
-                                    <div class="form-group col-sm-6">
+                                    <div class="form-group col-sm-4">
                                         <label>Section <span class="red">*</span></label>
                                         <input type="text" name="Songs[section]" class="form-control" id="song_section"
-                                               value="{{ params.section }}" placeholder="Ex: ul#lyric-centerlist a">
+                                               placeholder="Ex: ul#lyric-centerlist a"
+                                               value="{{ params.section }}">
                                     </div>
-                                    <div class="form-group col-sm-6">
-                                        <label>Lyric or Chord Section (Optional)</label>
-                                        <input type="text" name="Songs[lyric_section]" class="form-control"
-                                               value="{{ params.lyric_section }}" placeholder="Ex: span.lirik_line">
-                                        <p class="text-muted">Class or ID of the lyric area. Ex: span.lirik_line</p>
+                                    <div class="form-group col-sm-4">
+                                        <label>Lyric or Chord Section (<span class="red">Optional</span>)</label>
+                                        <input type="text" name="Songs[chord_section]" class="form-control"
+                                               value="{{ params.chord_section }}" placeholder="Ex: span.chord_line">
+                                        <p class="text-muted">Class or ID of the chord area. Ex: span.chord_line</p>
+                                    </div>
+                                    <div class="form-group col-sm-4">
+                                        <label>Filter Result (<span class="red">Optional</span>)</label>
+                                        <input type="text" name="Songs[filter_content]" class="form-control"
+                                               value="{{ params.filter_content }}" placeholder="Ex: /ada-band/">
+                                        <p class="text-muted">Filter result just contain something</p>
+                                    </div>
+                                    <div class="form-group col-sm-4">
+                                        <label class="checkbox-inline">
+                                            <input id="inlineCheckbox1" name="Songs[use_slug_as_title]" type="checkbox"
+                                                   {% if params.use_slug_as_title and params.use_slug_as_title == 'on' %}checked="checked"{% endif %}>
+                                            Use Last Url Slug As Song Title (<span class="red">Optional</span>)
+                                        </label>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -165,7 +179,7 @@ Generate Lirik Lagu - {{ App.params.site_name }}
                                             <a href="{{ song.slug }}" target="_newtab">{{ song.slug }}</a>
                                         </td>
                                         <td>
-                                            <a href="{{ 'song/lyrics/delete-song' | link }}/{{ song.id }}" onclick="return hapus(this);">
+                                            <a href="{{ 'song/chords/delete-song' | link }}/{{ song.id }}" onclick="return hapus(this);">
                                                 <i class="fa fa-trash-o"></i>
                                             </a>
                                         </td>
@@ -202,15 +216,16 @@ Generate Lirik Lagu - {{ App.params.site_name }}
             }
             return true;
         });
-        $('#song_url').val($("#artist-list").find('option:selected').attr("attr-url"));
-        $('#song_section').val($("#artist-list").find('option:selected').attr("attr-section"));
+        //$('#song_url').val($("#artist-list").find('option:selected').attr("attr-url"));
+        //$('#song_section').val($("#artist-list").find('option:selected').attr("attr-section"));
         $("#artist-list").change(function(){
             var element = $(this).find('option:selected');
             var url = element.attr("attr-url");
             var section = element.attr("attr-section");
-
-            $('#song_url').val(url);
-            $('#song_section').val(section);
+            if (url.length > 0)
+                $('#song_url').val(url);
+            if (section.length >0)
+                $('#song_section').val(section);
         });
         $('select[id="abjad-list"]').change(function () {
             var url = window.location.href.split('?')[0];
