@@ -844,6 +844,21 @@ jQuery(window).load(function () {
                 })
             });
         }
+        if ($('.top-search-form .choose-search-type').length >0) {
+            $('a.choose-search-type').click(function () {
+                $('.top-search-form').find('button.dropdown-toggle')
+                    .html($(this).text()+' <span class="caret"></span>');
+                $('#search-path-type').val($(this).attr('attr-type'));
+            });
+            $('#top-search-btn-submit').click(function () {
+                var loc = window.location;
+                var currentURL = loc.protocol + '//' + loc.host;
+                var q = $('.top-search-form').find('input[name="q"]').val();
+                if (q.length > 0) {
+                    window.location.href = currentURL +'/'+ $('#search-path-type').val() +'/search?q='+ q;
+                }
+            });
+        }
         $(".loader-bg").fadeOut('slow');
     }
 })(jQuery);
@@ -1024,5 +1039,4 @@ jQuery(window).smartresize(function () {
             $(this).find('.list-offer-back').stop(true, true).animate({height: gh + 20}, 0);
         });
     }, 600);
-
 });

@@ -192,9 +192,16 @@ html.no-pointerevents.no-touchevents .list-agency:hover .list-agency-right,html.
     header.header2.sticky .navbar-nav, header.header2 .navbar-nav {margin:0px -15px;}
     header.header2.sticky .navbar-nav>li, header.header2 .navbar-nav>li {border-bottom: 1px solid #d0d0d0;}
     header.header2.sticky .navbar-nav>li>a, header.header2 .navbar-nav>li>a {padding:10px;margin-bottom:0px;margin-top: 0px;}
+    a.navbar-toggle {border:none;padding:0px;}
+    #searchbar {padding:15px 10px;-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.1);box-shadow: inset 0 1px 0 rgba(255,255,255,.1);  }
+    .top-search-form .dropdown-menu {position: fixed;top:120px;box-shadow: none;}
+    .top-search-form .dropdown-menu li {border-bottom: 1px solid #ebebeb;}
+    .top-search-form .form-control {margin-top: 0px;}
+    header.header2 a.navbar-toggle {color: #ffffff;}
 }
 @media only screen and (min-width:768px){
     header.header2.sticky,header.header3.sticky{background:#1B2835}
+    #searchbar {display: none !important;}
 }
 @media only screen and (max-width:480px){
     .simple-search-cont input.simple-search-input{border-bottom:1px solid #ebebeb}

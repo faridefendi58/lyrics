@@ -3,7 +3,7 @@
 $app->get('/lirik/search', function ($request, $response, $args) use ($app) {
     $model = new \ExtensionsModel\SongModel();
     $params = $request->getParams();
-    if ($params['type'] == 'chord') {
+    if ($params['type'] == 'chord' || $params['type'] == 'kord') {
         return $response->withRedirect('/kord/search?q='.$params['q']);
     }
 
