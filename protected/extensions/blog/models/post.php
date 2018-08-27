@@ -7,6 +7,10 @@ require_once __DIR__ . '/../../../models/base.php';
 
 class PostModel extends \Model\BaseModel
 {
+    const STATUS_DRAFT = 'draft';
+    const STATUS_PUBLISHED = 'published';
+    const STATUS_ARCHIVED = 'archived';
+
     public static function model($className=__CLASS__)
     {
         return parent::model($className);
@@ -309,5 +313,34 @@ class PostModel extends \Model\BaseModel
         }
 
         return false;
+    }
+
+    public function getSitemaps($data = [])
+    {
+        $sql = "SELECT t.id, c.slug, c.updated_at AS last_update  
+        FROM {tablePrefix}ext_post t
+        LEFT JOIN {tablePrefix}ext_post_content c ON c.post_id = t.id
+        WHERE t.status =:status AND t.post_type =:post_type";
+
+        $params = [ 'status' => self::STATUS_PUBLISHED, 'post_type' => 'post' ];
+
+        $sql .= " ORDER BY t.created_at ASC";
+
+        $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+        $rows = \Model\R::getAll( $sql, $params );
+        $items = [];
+        if (count($rows) > 0) {
+            $tool = new \Components\Tool();
+            $url_origin = $tool->url_origin();
+            foreach ($rows as $i => $row) {
+                $items[] = [
+                    'loc' => $url_origin.'/blog/'.$row['slug'],
+                    'lastmod' => date("c", strtotime($row['last_update'])),
+                    'priority' => 0.5
+                ];
+            }
+        }
+        return $items;
     }
 }

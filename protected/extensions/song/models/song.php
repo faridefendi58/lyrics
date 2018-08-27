@@ -459,4 +459,80 @@ class SongModel extends \Model\BaseModel
         }
         return 0;
     }
+
+    public function getSitemaps($data = [])
+    {
+        $sql = "SELECT t.id, t.slug, a.slug AS artist_slug, ab.title AS abjad_name,
+        l.featured AS lyric_featured, c.featured AS chord_featured,
+        l.updated_at AS last_lyric_update, c.updated_at AS last_chord_update
+        FROM {tablePrefix}ext_song t
+        LEFT JOIN {tablePrefix}ext_song_artists a ON a.id = t.artist_id
+        LEFT JOIN {tablePrefix}ext_song_abjads ab ON ab.id = a.abjad_id
+        LEFT JOIN {tablePrefix}ext_song_chord_refferences c ON c.song_id = t.id
+        LEFT JOIN {tablePrefix}ext_song_lyric_refferences l ON l.song_id = t.id
+        WHERE t.status =:status";
+
+        $params = [ 'status' => self::STATUS_PUBLISHED ];
+
+        $sql .= " ORDER BY a.name ASC";
+
+        $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+        $rows = \Model\R::getAll( $sql, $params );
+        $items = [];
+        if (count($rows) > 0) {
+            $tool = new \Components\Tool();
+            $url_origin = $tool->url_origin();
+            $artists = []; $abjads = [];
+            $artist_chords = []; $abjad_chords = [];
+            foreach ($rows as $i => $row) {
+                if (!in_array($row['abjad_name'], $abjads)) {
+                    $items[] = [
+                        'loc' => $url_origin.'/lirik/'.$row['abjad_name'],
+                        'lastmod' => date("c"),
+                        'priority' => 0.5
+                    ];
+                    array_push($abjads, $row['abjad_name']);
+                }
+                if (!in_array($row['artist_slug'], $artists)) {
+                    $items[] = [
+                        'loc' => $url_origin.'/lirik/'.$row['artist_slug'],
+                        'lastmod' => date("c"),
+                        'priority' => 0.5
+                    ];
+                    array_push($artists, $row['artist_slug']);
+                }
+                $items[] = [
+                    'loc' => $url_origin.'/lirik/'.$row['artist_slug'].'/'.$row['slug'],
+                    'lastmod' => date("c", strtotime($row['last_lyric_update'])),
+                    'priority' => ($row['lyric_featured'] > 0)? 0.6 : 0.5
+                ];
+                if (!empty($row['last_chord_update'])) {
+                    if (!in_array($row['abjad_name'], $abjad_chords)) {
+                        $items[] = [
+                            'loc' => $url_origin.'/kord/'.$row['abjad_name'],
+                            'lastmod' => date("c"),
+                            'priority' => 0.5
+                        ];
+                        array_push($abjad_chords, $row['abjad_name']);
+                    }
+                    if (!in_array($row['artist_slug'], $artist_chords)) {
+                        $items[] = [
+                            'loc' => $url_origin.'/kord/'.$row['artist_slug'],
+                            'lastmod' => date("c"),
+                            'priority' => 0.5
+                        ];
+                        array_push($artist_chords, $row['artist_slug']);
+                    }
+                    $items[] = [
+                        'loc' => $url_origin.'/kord/'.$row['artist_slug'].'/'.$row['slug'],
+                        'lastmod' => date("c", strtotime($row['last_chord_update'])),
+                        'priority' => ($row['chord_featured'] > 0)? 0.6 : 0.5
+                    ];
+                }
+            }
+        }
+
+        return $items;
+    }
 }
