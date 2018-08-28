@@ -177,6 +177,30 @@ class ChordsController extends BaseController
                 $update2 = \ExtensionsModel\SongCordRefferenceModel::model()->update($model2);
 
                 if ($update2) {
+                    // also update the media if any
+                    $model3 = \ExtensionsModel\SongMediaRefferenceModel::model()->findByAttributes(['song_id' => $model->id]);
+                    if (isset($_POST['Songs']['mp3_url']) && !empty($_POST['Songs']['mp3_url'])) {
+                        if (!$model3 instanceof \RedBeanPHP\OODBBean) {
+                            $model3 = new \ExtensionsModel\SongMediaRefferenceModel('create');
+                            $model3->mp3_url = $_POST['Songs']['mp3_url'];
+                            if (!empty($_POST['Songs']['video_url'])) {
+                                $model3->video_url = $_POST['Songs']['video_url'];
+                            }
+                            $model3->song_id = $model->id;
+                            $model3->status = \ExtensionsModel\SongMediaRefferenceModel::STATUS_ENABLED;
+                            $model3->created_at = date('Y-m-d H:i:s');
+                            $model3->updated_at = date('Y-m-d H:i:s');
+                            $save3 = \ExtensionsModel\SongMediaRefferenceModel::model()->save($model3);
+                        } else {
+                            $model3->mp3_url = $_POST['Songs']['mp3_url'];
+                            if (!empty($_POST['Songs']['video_url'])) {
+                                $model3->video_url = $_POST['Songs']['video_url'];
+                            }
+                            $model3->status = \ExtensionsModel\SongMediaRefferenceModel::STATUS_ENABLED;
+                            $model3->updated_at = date('Y-m-d H:i:s');
+                            $save3 = \ExtensionsModel\SongMediaRefferenceModel::model()->update($model3);
+                        }
+                    }
                     $song_detail = $smodel->getSongDetail($model->id);
                     $message = 'Your lyric is successfully updated.';
                     $success = true;
@@ -192,6 +216,7 @@ class ChordsController extends BaseController
             'artists' => $artists,
             'genres' => $genres,
             'song' => $song_detail,
+            'model' => $smodel,
             'message' => ($message) ? $message : null,
             'success' => $success,
         ]);

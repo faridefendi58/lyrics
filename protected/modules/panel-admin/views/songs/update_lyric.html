@@ -31,7 +31,7 @@ Perbarui Lirik - {{ App.params.site_name }}
 							Kolom bertanda <span class="red">*</span> tidak boleh dikosongi
 						</div>
 						<div class="panel-body">
-							{% include 'songs/_form.html' with {'song':song, 'status_list':status_list} %}
+							{% include 'songs/_form.html' with {'song':song, 'status_list':status_list, 'model':model} %}
 						</div>
 					</div>
 				</div>

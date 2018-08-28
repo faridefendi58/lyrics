@@ -98,6 +98,7 @@ function transpose(basic_tone,new_basic_tone) {
         $(this).text(new_chord);
         resetPosition();
     });
+    onAfterTransposed();
 }
 function build_chord() {
     $('head').append('<style>.blog-text sup {top: -1.3em;font-size: 14px;}.blog-text p {line-height: 2.7;}</style>');
@@ -123,6 +124,7 @@ function resetPosition() {
         }
     });
 }
+function onAfterTransposed() {}
 String.prototype.replaceAll = function (stringFind, stringReplace) {
     var ex = new RegExp(stringFind.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1"), "g");
     return this.replace(ex, stringReplace);
