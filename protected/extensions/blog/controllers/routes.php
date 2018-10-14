@@ -28,10 +28,11 @@ $app->get('/blog/[{name}]', function ($request, $response, $args) {
                 ]);
             }
             
-            return $this->response
+            /*return $this->response
                 ->withStatus(500)
                 ->withHeader('Content-Type', 'text/html')
-                ->write('Page not found!');
+                ->write('Page not found!');*/
+            return $this->view->render($response, '404.phtml');
         } else {
             $model->setViewCounter($data);
         }

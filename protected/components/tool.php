@@ -71,7 +71,7 @@ class Tool
         $pages = array();
         foreach (glob($_SERVER['DOCUMENT_ROOT'].'/themes/'.$omodel->getOptions()['theme'].'/views/*.phtml') as $filename) {
             $page = basename($filename, '.phtml');
-            $excludes = ['post', 'blog', 'sitemap.xml'];
+            $excludes = ['post', 'sitemap.xml', '404'];
             if (file_exists($filename) && !in_array($page, $excludes) && strpos($page, "_") == false) {
                 $loc = self::url_origin().'/'.$page;
                 if ($page == 'index') {

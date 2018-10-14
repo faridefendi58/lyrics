@@ -1,5 +1,5 @@
 jQuery(document).ready(function($) {
-    $('body').append('<div id="switcher-button" style="background: #00ca9b; text-align: center; padding-top: 12px; width: 50px; height: 50px; color: #ffffff; cursor: pointer; z-index: 159; position: fixed; top: 150px; right: 0px;"><i class="fa fa-cog fa-spin fa-2x"></i></div><div id="switcher" style="width: 285px; position: fixed; overflow-x: hidden; right: -285px; top: 130px; z-index: 159; margin-top: 20px; margin-bottom: 20px;"> <div style="float: left; background: #00ca9b; width: 285px; height: 50px; line-height: 50px; text-align: center; color: #ffffff;"> <h4 style="color:#ffffff; line-height: 50px;">Settings</h4> </div><div id="switch-content" style="width: 285px; background: white; padding: 10px; float: left;"> <h5 style="margin: 0px 0 10px 0" class="text-bold">Transpose</h5> <div id="C" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px; margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">C</div><div id="C#" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px; margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">C#</div><div id="D" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px; margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">D</div><div id="D#" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px;margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">D#</div><div id="E" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px;margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">E</div><div id="F" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">F</div><div id="F#" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px; margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">F#</div><div id="G" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px;margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">G</div><div id="G#" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px;margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">G#</div><div id="A" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px;margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">A</div><div id="A#" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px;margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">A#</div><div id="B" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">B</div></div></div>');
+    $('body').append('<div id="switcher-button" style="background: #00ca9b; text-align: center; padding-top: 12px; width: 50px; height: 50px; color: #ffffff; cursor: pointer; z-index: 560; position: fixed; top: 150px; right: 0px;"><i class="fa fa-music fa-2x"></i></div><div id="switcher" style="width: 285px; position: fixed; overflow-x: hidden; right: -285px; top: 130px; z-index: 560; margin-top: 20px; margin-bottom: 20px;"> <div style="float: left; background: #00ca9b; width: 285px; height: 50px; line-height: 50px; text-align: center; color: #ffffff;"> <h4 style="color:#ffffff; line-height: 50px;">Transpose</h4> </div><div id="switch-content" style="width: 285px; background: white; padding: 10px; float: left;"> <h5 style="margin: 0px 0 10px 0" class="text-bold">Ubah Nada Dasar</h5> <div id="C" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px; margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">C</div><div id="C#" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px; margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">C#</div><div id="D" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px; margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">D</div><div id="D#" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px;margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">D#</div><div id="E" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px;margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">E</div><div id="F" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">F</div><div id="F#" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px; margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">F#</div><div id="G" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px;margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">G</div><div id="G#" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px;margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">G#</div><div id="A" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px;margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">A</div><div id="A#" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-right: 10px;margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">A#</div><div id="B" style="width: 35px; height: 35px; background: #ebebeb; float: left; margin-bottom: 15px; cursor: pointer;padding-top:5px;" class="font-size-18 text-bold text-center">B</div></div></div>');
     $('head').append('<style>.switch-button-label{float:left;font-size:10pt;cursor:pointer}.switch-button-label.off{color:#adadad}.switch-button-label.on{color:#08C}.switch-button-background{float:left;position:relative;background:#ccc;border:1px solid #aaa;margin:1px 10px;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px;cursor:pointer}.switch-button-button{position:absolute;left:-1px;top:-1px;background:#FAFAFA;border:1px solid #aaa;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px;}.current-basic-tone{background:#f0ad4e !important;color:#ffffff;}</style>');
     $("input#boxed").switchButton({on_label: " BOXED",off_label: "WIDE ",width: 125, height: 25, button_width: 30, checked: false });
     if( w_height - 150 < $("#switcher").innerHeight() ) {
@@ -12,7 +12,7 @@ jQuery(document).ready(function($) {
             $("#switcher").animate( { "right": "-285px" }, 500);
             $("#switcher-button").animate( { "right": "0px" }, 500);
             $("#switch-content").css("box-shadow", "none");
-
+            $(this).find('i').removeClass('fa-times').addClass('fa-music');
         } else {
             $("#switcher").addClass("open");
             $("#switcher").animate( { "right": "0px" }, 500);
@@ -20,6 +20,21 @@ jQuery(document).ready(function($) {
             $("#switch-content").css("box-shadow", "0px 5px 5px 0px rgba(0, 0, 0, 0.35)");
             $("#switch-content").css("border-bottom", "1px solid #ebebeb");
             $("#switch-content").css("border-left", "1px solid #ebebeb");
+            $(this).find('i').removeClass('fa-music').addClass('fa-times');
+        }
+    });
+    $("#scroll-button").click( function () {
+        if( $("#scroll").hasClass("open") ) {
+            $("#scroll").removeClass("open");
+            $("#scroll").animate( { "right": "-100px" }, 500);
+            $("#scroll-button").animate( { "right": "0px" }, 500);
+            $("#scroll-content").css("box-shadow", "none");
+            $(this).find('i').addClass('hidden');
+        } else {
+            $("#scroll").addClass("open");
+            $("#scroll").animate( { "right": "0px" }, 80);
+            $("#scroll-button").animate( { "right": "100px" }, 500);
+            $(this).find('i').removeClass('hidden');
         }
     });
     build_chord();
@@ -95,18 +110,21 @@ function transpose(basic_tone,new_basic_tone) {
             new_chord = 'F';
         if (new_chord == 'B#')
             new_chord = 'C';
-        $(this).text(new_chord);
+
+        if ($(this).text().length > 0) {
+            $(this).text(new_chord);
+        }
         resetPosition();
     });
     onAfterTransposed();
 }
 function build_chord() {
     $('head').append('<style>.blog-text sup {top: -1.3em;font-size: 14px;}.blog-text p {line-height: 2.7;}</style>');
-    var blog_text = $('.blog-text').html().replaceAll("[",'<sup><a href="#" class="chord">');
+    /*var blog_text = $('.blog-text').html().replaceAll("[",'<sup><a href="#" class="chord">');
     var blog_text = blog_text.replaceAll("]",'</a></sup>');
     var blog_text = blog_text.replaceAll("{", '<a href="#" class="chord">');
     var blog_text = blog_text.replaceAll("}",'</a>');
-    $('.blog-text').html(blog_text);
+    $('.blog-text').html(blog_text);*/
     $('.blog-text').find('a').each(function () {
         $(this).addClass($(this).text());
     });
@@ -114,13 +132,12 @@ function build_chord() {
 }
 function resetPosition() {
     $('.blog-text').find('a').each(function () {
-        if ($(this).text().length > 1 && $(this).parent()[0].nodeName.toLowerCase() == 'sup') {
-            var lgth = -0.6 * $(this).text().length;
-            $(this).parent().css('margin-left', lgth+'em');
-        }
-        if ($(this).text().length == 1 && $(this).parent()[0].nodeName.toLowerCase() == 'sup') {
-            var lgth = -0.7;
-            $(this).parent().css('margin-left', lgth+'em');
+        if ($(this).parent()[0].nodeName.toLowerCase() == 'sup') {
+            if ($(this).text().length > 0) {
+                $(this).parent().attr('style', 'width:0px;height:0px;display:inline-block;');
+            } else {
+                $(this).parent().attr('style', 'width:20px;height:0px;display:inline-block;');
+            }
         }
     });
 }

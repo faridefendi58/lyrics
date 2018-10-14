@@ -88,25 +88,51 @@ class ChordsController extends BaseController
             $model->slug = $_POST['Songs']['slug'];
             $model->artist_id = $_POST['Songs']['artist_id'];
             $model->genre_id = $_POST['Songs']['genre_id'];
+            if (isset($_POST['Songs']['album_id'])) {
+                $model->album_id = $_POST['Songs']['album_id'];
+            }
+            if (!empty($_POST['Songs']['story'])) {
+                $model->story = $_POST['Songs']['story'];
+            }
             $model->status = \ExtensionsModel\SongModel::STATUS_DRAFT;
             $model->created_at = date('Y-m-d H:i:s');
             $model->updated_at = date('Y-m-d H:i:s');
             $create = \ExtensionsModel\SongModel::model()->save(@$model);
             if ($create > 0) {
-                $model2 = new \ExtensionsModel\SongLyricRefferenceModel('create');
+                $model2 = new \ExtensionsModel\SongCordRefferenceModel('create');
                 $model2->song_id = $model->id;
                 $model2->url = $_POST['Songs']['refference_url'];
                 $model2->section = $_POST['Songs']['refference_section'];
-                $model2->status = \ExtensionsModel\SongLyricRefferenceModel::STATUS_PENDING;
+
+                if (empty($model2->url))
+                    $model2->url = '#';
+                $model2->section = $_POST['Songs']['refference_section'];
+                if (empty($model2->section))
+                    $model2->section = '#';
+
+                if (isset($_POST['Songs']['permalink']) && !empty($_POST['Songs']['permalink'])) {
+                    $model2->permalink = $_POST['Songs']['permalink'];
+                }
+
+                if (isset($_POST['Songs']['content']) && !empty($_POST['Songs']['content'])) {
+                    $model2->result = $_POST['Songs']['content'];
+                }
+                if (!empty($_POST['Songs']['meta_title']))
+                    $model2->meta_title = $_POST['Songs']['meta_title'];
+                if (!empty($_POST['Songs']['meta_keyword']))
+                    $model2->meta_keyword = $_POST['Songs']['meta_keyword'];
+                if (!empty($_POST['Songs']['meta_description']))
+                    $model2->meta_description = $_POST['Songs']['meta_description'];
+                $model2->status = \ExtensionsModel\SongCordRefferenceModel::STATUS_PENDING;
                 $model2->created_at = date('Y-m-d H:i:s');
                 $model2->updated_at = date('Y-m-d H:i:s');
-                $create2 = \ExtensionsModel\SongLyricRefferenceModel::model()->save(@$model2);
+                $create2 = \ExtensionsModel\SongCordRefferenceModel::model()->save(@$model2);
 
-                $message = 'Your lyric is successfully created.';
+                $message = 'Your chord is successfully created.';
                 $success = true;
                 $song_id = $model->id;
             } else {
-                $message = 'Failed to create new lyric.';
+                $message = 'Failed to create new chord.';
                 $success = false;
             }
         }
@@ -155,6 +181,12 @@ class ChordsController extends BaseController
             $model->slug = $slug;
             $model->artist_id = $_POST['Songs']['artist_id'];
             $model->genre_id = $_POST['Songs']['genre_id'];
+            if (isset($_POST['Songs']['album_id'])) {
+                $model->album_id = $_POST['Songs']['album_id'];
+            }
+            if (!empty($_POST['Songs']['story'])) {
+                $model->story = $_POST['Songs']['story'];
+            }
             $model->status = $_POST['Songs']['status'];
             if ($model->status == \ExtensionsModel\SongModel::STATUS_PUBLISHED && empty($model->published_at)) {
                 $model->published_at = date('Y-m-d H:i:s');
@@ -164,17 +196,47 @@ class ChordsController extends BaseController
             $update = \ExtensionsModel\SongModel::model()->update($model);
             if ($update) {
                 $model2 = \ExtensionsModel\SongCordRefferenceModel::model()->findByAttributes(['song_id' => $model->id]);
+                $is_new_record = false;
+                if (!$model2 instanceof \RedBeanPHP\OODBBean) {
+                    $model2 = new \ExtensionsModel\SongCordRefferenceModel('create');
+                    $is_new_record = true;
+                }
                 $model2->url = $_POST['Songs']['refference_url'];
                 $model2->section = $_POST['Songs']['refference_section'];
+
+                if (empty($model2->url))
+                    $model2->url = '#';
+                $model2->section = $_POST['Songs']['refference_section'];
+                if (empty($model2->section))
+                    $model2->section = '#';
+
+                if (isset($_POST['Songs']['permalink']) && !empty($_POST['Songs']['permalink'])) {
+                    $model2->permalink = $_POST['Songs']['permalink'];
+                }
+
                 if (isset($_POST['Songs']['content']) && !empty($_POST['Songs']['content'])) {
                     $model2->result = $_POST['Songs']['content'];
                 }
+
+                if (!empty($_POST['Songs']['meta_title']))
+                    $model2->meta_title = $_POST['Songs']['meta_title'];
+                if (!empty($_POST['Songs']['meta_keyword']))
+                    $model2->meta_keyword = $_POST['Songs']['meta_keyword'];
+                if (!empty($_POST['Songs']['meta_description']))
+                    $model2->meta_description = $_POST['Songs']['meta_description'];
+
                 if ($model->status == \ExtensionsModel\SongModel::STATUS_PUBLISHED) {
                     $model2->status = \ExtensionsModel\SongCordRefferenceModel::STATUS_APPROVED;
                     $model2->approved_at = date("Y-m-d H:i:s");
                 }
                 $model2->updated_at = date('Y-m-d H:i:s');
-                $update2 = \ExtensionsModel\SongCordRefferenceModel::model()->update($model2);
+                if ($is_new_record) {
+                    $model2->song_id = $model->id;
+                    $model2->created_at = date('Y-m-d H:i:s');
+                    $create2 = \ExtensionsModel\SongCordRefferenceModel::model()->save($model2);
+                } else {
+                    $update2 = \ExtensionsModel\SongCordRefferenceModel::model()->update($model2);
+                }
 
                 if ($update2) {
                     // also update the media if any

@@ -12,6 +12,9 @@ require __DIR__ . '/controller.php';
 // Tool
 require __DIR__ . '/tool.php';
 
+// Static
+require __DIR__ . '/static.php';
+
 //trailling slash
 use Psr\Http\Message\RequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -82,6 +85,13 @@ $container['logger'] = function ($c) {
     $logger->pushProcessor(new Monolog\Processor\UidProcessor());
     $logger->pushHandler(new Monolog\Handler\StreamHandler($settings['path'], $settings['level']));
     return $logger;
+};
+
+// 404 page
+$container['notFoundHandler'] = function ($c) {
+    return function ($request, $response) use ($c) {
+        return $c->view->render($response, '404.phtml');
+    };
 };
 
 // filter
@@ -170,7 +180,8 @@ function addGlobal($env, $c, $user = null)
         'optionModel' => new \Model\OptionsModel(),
         'request' => $c['request'],
         'currentPath' => $base_path,
-        'tool' => new \Components\Tool($setting['theme']['path'].'/'.$setting['theme']['name'].'/')
+        'tool' => new \Components\Tool($setting['theme']['path'].'/'.$setting['theme']['name'].'/'),
+        'call' => new \Components\CStatic($c, $user)
     ];
 
     $env->addGlobal('App', $globals);

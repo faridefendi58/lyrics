@@ -1,4 +1,17 @@
 <?php
+// just redirection detected error by google
+$app->get('/search', function ($request, $response, $args) {
+    $params = $request->getParams();
+    if (empty($params['q'])) {
+        $params['q'] = 'lirik';
+    }
+
+    return $response->withStatus(301)->withHeader('Location', '/lirik/search?q='. $params['q']);
+});
+// also just redirection detected error by google
+$app->get('/artist/[{name}]', function ($request, $response, $args) {
+    return $response->withStatus(301)->withHeader('Location', '/');
+});
 // frontend url
 $app->get('/lirik/search', function ($request, $response, $args) use ($app) {
     $model = new \ExtensionsModel\SongModel();
@@ -35,7 +48,7 @@ $app->get('/lirik[/{artist}[/{title}]]', function ($request, $response, $args) {
             $abmodel = \ExtensionsModel\SongAbjadModel::model()->findByAttributes(['title' => strtoupper($args['artist'])]);
             $artists = null;
             if ($abmodel instanceof \RedBeanPHP\OODBBean) {
-                $artists = $model->getArtists(['abjad_id' => $abmodel->id]);
+                $artists = $model->getArtists(['abjad_id' => $abmodel->id, 'has_lyric' => true]);
             }
 
             return $this->view->render($response, 'song_lyric_index.phtml', [
@@ -46,6 +59,19 @@ $app->get('/lirik[/{artist}[/{title}]]', function ($request, $response, $args) {
         }
     } else {
         $data = $model->getSong($args['title']);
+        if (empty($data)) {
+            // check by title
+            $data = $model->getSongByTitle(strtolower($args['title']), $args['artist']);
+
+            if (!empty($data['lyric_permalink']))
+                return $response->withRedirect('/lirik/'.$args['artist'].'/'.$data['lyric_permalink']);
+            else
+                return $response->withRedirect('/lirik/'.$args['artist'].'/'.$data['lyric_slug']);
+        } else {
+            if (!empty($data['lyric_permalink']) && $data['lyric_permalink'] != $args['title']) {
+                return $response->withRedirect('/lirik/'.$args['artist'].'/'.$data['lyric_permalink']);
+            }
+        }
 
         return $this->view->render($response, 'song_lyric.phtml', [
             'data' => $data,
@@ -53,10 +79,7 @@ $app->get('/lirik[/{artist}[/{title}]]', function ($request, $response, $args) {
         ]);
     }
 
-    return $this->response
-        ->withStatus(500)
-        ->withHeader('Content-Type', 'text/html')
-        ->write('Page not found!');
+    return $this->view->render($response, '404.phtml');
 });
 
 $app->get('/kord/search', function ($request, $response, $args) {
@@ -102,6 +125,19 @@ $app->get('/kord[/{artist}[/{title}]]', function ($request, $response, $args) {
         }
     } else {
         $data = $model->getSong($args['title']);
+        if (empty($data)) {
+            // check by title
+            $data = $model->getSongByTitle(strtolower($args['title']), $args['artist']);
+
+            if (!empty($data['chord_permalink']))
+                return $response->withRedirect('/kord/'.$args['artist'].'/'.$data['chord_permalink']);
+            else
+                return $response->withRedirect('/kord/'.$args['artist'].'/'.$data['chord_slug']);
+        } else {
+            if (!empty($data['chord_permalink']) && $data['chord_permalink'] != $args['title']) {
+                return $response->withRedirect('/kord/'.$args['artist'].'/'.$data['chord_permalink']);
+            }
+        }
 
         return $this->view->render($response, 'song_chord.phtml', [
             'data' => $data,
@@ -109,10 +145,7 @@ $app->get('/kord[/{artist}[/{title}]]', function ($request, $response, $args) {
         ]);
     }
 
-    return $this->response
-        ->withStatus(500)
-        ->withHeader('Content-Type', 'text/html')
-        ->write('Page not found!');
+    return $this->view->render($response, '404.phtml');
 });
 
 foreach (glob(__DIR__.'/*_controller.php') as $controller) {

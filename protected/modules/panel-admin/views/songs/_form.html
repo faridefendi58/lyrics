@@ -3,116 +3,166 @@
 {% endif %}
 <form method="post" name="page-create">
     <div class="row">
-        {% set song_singers = model.getSongsWithArtist({'limit':'1000'}) %}
-        {% if song_singers %}
-        <div class="form-group col-sm-4">
-            <label>Pilih Judul Lagu (<span class="red">Optional</span>)</label>
-            <select name="Songs[title_id]" class="form-control select2-basic select-song">
-                <option value=""></option>
-                {% for singer_name, the_songs in song_singers %}
-                <optgroup label="{{ singer_name }}">
-                    {% for si,the_song in the_songs %}
-                    <option value="{{ the_song.id }}"
-                            attr-title="{{ the_song.title }}"
-                            attr-artist_id="{{ the_song.artist_id }}"
-                            attr-artist_name="{{ the_song.artist_name }}"
-                            attr-song_url="{{ the_song.song_url }}"
-                            attr-song_section="{{ the_song.song_section }}"
-                            attr-chord_url="{{ the_song.chord_url }}"
-                            attr-chord_section="{{ the_song.chord_section }}"
-                            attr-song_genre="{{ the_song.genre_id }}">{{ the_song.title }}</option>
-                    {% endfor %}
-                </optgroup>
-                {% endfor %}
-            </select>
-        </div>
-        {% endif %}
-        <div class="form-group col-sm-4">
-            <label>Judul Lagu <span class="red">*</span></label>
-            <input type="text" name="Songs[title]" class="form-control"
-                   id="song-title"
-                   onchange="getSlug(this)"
-                   value="{{ song.title }}">
-        </div>
-        <div class="form-group col-sm-4">
-            <label>Permalink <span class="red">*</span></label>
-            <input type="text" name="Songs[slug]" class="form-control"
-                   id="slug" value="{{ song.slug }}"
-                   placeholder="Pisahkan spasi dengan tanda '-'. Ex: cinta-ini-membunuhku">
-        </div>
-        <div class="form-group col-sm-4">
-            <label>Nama Artis</label>
-            <select name="Songs[artist_id]" class="form-control select2-basic" id="select-artist">
-                <option value=""></option>
-                {% for abjad, the_artists in artists %}
-                <optgroup label="{{ abjad | title }}">
-                    {% for ai,artist in the_artists %}
-                    <option value="{{ artist.id }}"
-                            attr-abjad="{{ abjad }}">{{ artist.name }}</option>
-                    {% endfor %}
-                </optgroup>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="form-group col-sm-4">
-            <label>Referensi Url <span class="red">*</span></label>
-            <input type="text" name="Songs[refference_url]" class="form-control"
-                   value="{{ song.lyric_url }}" id="song-url"
-                   placeholder="Url atau alamat website referensi">
-        </div>
-        <div class="form-group col-sm-4">
-            <label>Genre</label>
-            <select name="Songs[genre_id]" class="form-control" id="song-genre">
-                {% for genre in genres %}
-                <option value="{{ genre.id }}" {% if song and song.genre_id == genre.id %}selected{% endif %}>{{ genre.title }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="form-group col-sm-4">
-            <label>Scrap Section <span class="red">*</span></label>
-            <input type="text" name="Songs[refference_section]"
-                   class="form-control" id="refference-section"
-                   value="{{ song.lyric_section }}" placeholder="Ex: ul#lyric-centerlist a">
-        </div>
-        {% if song %}
-        {% set media = model.getMedia({'song_id':song.id}) %}
-        <div class="form-group col-sm-4">
-            <label>Song Mp3 Src</label>
-            <input type="text" name="Songs[mp3_url]"
-                   class="form-control"
-                   value="{{ media.mp3_url }}" placeholder="Resource of mp3">
-        </div>
-        <div class="form-group col-sm-4">
-            <label>Song Video Src</label>
-            <input type="text" name="Songs[video_url]"
-                   class="form-control"
-                   value="{{ media.video_url }}" placeholder="Resource of video">
-        </div>
-        {% endif %}
-        {% if song and (song.lyric or song.chord) %}
-        <div class="form-group col-sm-12">
-            <label>Content <span class="red">*</span></label>
-            <textarea class="form-control editor" name="Songs[content]">
-                {% if use_for_chord %}
-                {{ song.chord }}
-                {% else %}
-                {{ song.lyric }}
+        <div class="col-sm-6">
+            <div class="row">
+                {% set song_singers = model.getSongsWithArtist({'limit':'1000'}) %}
+                {% if song_singers %}
+                <div class="form-group col-sm-6">
+                    <label>Pilih Judul Lagu (<span class="red">Optional</span>)</label>
+                    <select name="Songs[title_id]" class="form-control select2-basic select-song">
+                        <option value=""></option>
+                        {% for singer_name, the_songs in song_singers %}
+                        <optgroup label="{{ singer_name }}">
+                            {% for si,the_song in the_songs %}
+                            <option value="{{ the_song.id }}"
+                                    attr-title="{{ the_song.title }}"
+                                    attr-artist_id="{{ the_song.artist_id }}"
+                                    attr-artist_name="{{ the_song.artist_name }}"
+                                    attr-song_url="{{ the_song.song_url }}"
+                                    attr-song_section="{{ the_song.song_section }}"
+                                    attr-chord_url="{{ the_song.chord_url }}"
+                                    attr-chord_section="{{ the_song.chord_section }}"
+                                    attr-song_genre="{{ the_song.genre_id }}">{{ the_song.title }}</option>
+                            {% endfor %}
+                        </optgroup>
+                        {% endfor %}
+                    </select>
+                </div>
                 {% endif %}
-            </textarea>
+                <div class="form-group col-sm-6">
+                    <label>Nama Artis</label>
+                    <select name="Songs[artist_id]" class="form-control select2-basic" id="select-artist">
+                        <option value=""></option>
+                        {% for abjad, the_artists in artists %}
+                        <optgroup label="{{ abjad | title }}">
+                            {% for ai,artist in the_artists %}
+                            <option value="{{ artist.id }}"
+                                    attr-abjad="{{ abjad }}">{{ artist.name }}</option>
+                            {% endfor %}
+                        </optgroup>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group col-sm-12">
+                    <label>Judul Lagu <span class="red">*</span></label>
+                    <input type="text" name="Songs[title]" class="form-control"
+                           id="song-title"
+                           onchange="getSlug(this)"
+                           value="{{ song.title }}">
+                </div>
+                <div class="form-group col-sm-12">
+                    <label>Content <span class="red">*</span></label>
+                    <textarea class="form-control editor" name="Songs[content]">{% if use_for_chord %}{{ song.chord }}{% else %}{{ song.lyric }}{% endif %}</textarea>
+                </div>
+
+                <div class="form-group col-sm-12">
+                    <label>Additional Song Information</label>
+                    <textarea name="Songs[story]" class="form-control">{{ song.story }}</textarea>
+                </div>
+                {% if song %}
+                <div class="form-group col-sm-6">
+                    <label>Status</label>
+                    {% for status_code, status_name in status_list %}
+                    <label class="radio-inline">
+                        <input type="radio" name="Songs[status]" id="optionsRadios1" value="{{ status_code }}"
+                               {% if status_code == song.status %}checked="checked"{% endif %}>
+                        {{ status_name }}
+                    </label>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
         </div>
-        {% endif %}
-        {% if song %}
-        <div class="form-group col-sm-6">
-            <label>Status</label>
-            {% for status_code, status_name in status_list %}
-            <label class="radio-inline">
-                <input type="radio" name="Songs[status]" id="optionsRadios1" value="{{ status_code }}"
-                       {% if status_code == song.status %}checked="checked"{% endif %}>
-                {{ status_name }}
-            </label>
-            {% endfor %}
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="form-group col-sm-12">
+                    <label>Referensi Url <span class="red">*</span></label>
+                    <input type="text" name="Songs[refference_url]" class="form-control"
+                           value="{{ song.lyric_url }}" id="song-url"
+                           placeholder="Url atau alamat website referensi">
+                </div>
+                <div class="form-group col-sm-6">
+                    <label>Genre</label>
+                    <select name="Songs[genre_id]" class="form-control" id="song-genre">
+                        {% for genre in genres %}
+                        <option value="{{ genre.id }}" {% if song and song.genre_id == genre.id %}selected{% endif %}>{{ genre.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label>Scrap Section <span class="red">*</span></label>
+                    <input type="text" name="Songs[refference_section]"
+                           class="form-control" id="refference-section"
+                           value="{{ song.lyric_section }}" placeholder="Ex: ul#lyric-centerlist a">
+                </div>
+                {% if song %}
+                {% set media = model.getMedia({'song_id':song.id}) %}
+                <div class="form-group col-sm-6">
+                    <label>Song Mp3 Src</label>
+                    <input type="text" name="Songs[mp3_url]"
+                           class="form-control"
+                           value="{{ media.mp3_url }}" placeholder="Resource of mp3">
+                </div>
+                <div class="form-group col-sm-6">
+                    <label>Song Video Src</label>
+                    <input type="text" name="Songs[video_url]"
+                           class="form-control"
+                           value="{{ media.video_url }}" placeholder="Resource of video">
+                </div>
+                {% set albums = App.call.model("\\ExtensionsModel\\SongAlbumModel", 'getItems', {'title':'-'}) %}
+                <div class="form-group col-sm-6">
+                    <label>Nama Album</label>
+                    <select name="Songs[album_id]" class="form-control">
+                        {% for ai, album in albums %}
+                        <option value="{{ ai }}" {% if song and song.album_id == ai %}selected{% endif %}>{{ album }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label>&nbsp;</label>
+                    <a href="javascript:void(0);" class="btn btn-info">Tambah Album</a>
+                </div>
+                {% endif %}
+                <div class="form-group col-sm-12">
+                    <label>Permalink <span class="red">*</span></label>
+                    <input type="text" name="Songs[slug]" class="form-control"
+                           id="slug" value="{{ song.slug }}"
+                           placeholder="Pisahkan spasi dengan tanda '-'. Ex: cinta-ini-membunuhku">
+                </div>
+                <div class="form-group col-sm-12">
+                    <label>Custom Permalink</label>
+                    <input type="text" name="Songs[permalink]" class="form-control"
+                           id="custom-slug" value="{% if not use_for_chord %}{{ song.lyric_permalink }}{% else %}{{ song.chord_permalink }}{% endif %}"
+                           placeholder="Pisahkan spasi dengan tanda '-'. Ex: chord-ada-band-cinta-ini-membunuhku">
+                </div>
+                <div class="form-group col-sm-12">
+                    <label>Meta Title</label>
+                    <input type="text" name="Songs[meta_title]" class="form-control"
+                           id="meta-title"
+                           value="{% if not use_for_chord %}{{ song.lyric_meta_title }}{% else %}{{ song.chord_meta_title }}{% endif %}">
+                </div>
+                <div class="form-group col-sm-12">
+                    <label>Meta Keyword</label>
+                    {% if not use_for_chord %}
+                    {% set meta_keyword = song.lyric_meta_keyword %}
+                    {% else %}
+                    {% set meta_keyword = song.chord_meta_keyword %}
+                    {% endif %}
+                    <textarea name="Songs[meta_keyword]" class="form-control"
+                              id="meta-keyword">{{ meta_keyword }}</textarea>
+                </div>
+                <div class="form-group col-sm-12">
+                    <label>Meta Description</label>
+                    {% if not use_for_chord %}
+                    {% set meta_description = song.lyric_meta_description %}
+                    {% else %}
+                    {% set meta_description = song.chord_meta_description %}
+                    {% endif %}
+                    <textarea name="Songs[meta_description]" class="form-control"
+                              id="meta-description">{{ meta_description }}</textarea>
+                </div>
+            </div>
         </div>
-        {% endif %}
     </div>
     <div class="row">
         <div class="form-group col-sm-12">

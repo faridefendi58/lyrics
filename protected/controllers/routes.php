@@ -25,14 +25,22 @@ $app->get('/[{name}]', function ($request, $response, $args) {
 		$args['name'] = 'index';
 
     $settings = $this->get('settings');
+    $exts = json_decode( $settings['params']['extensions'], true );
+
     if (!file_exists($settings['theme']['path'].'/'.$settings['theme']['name'].'/views/'.$args['name'].'.phtml')) {
-        return $this->response
+        $msong = null;
+        if (in_array( 'song', $exts )) {
+            $msong = new \ExtensionsModel\SongModel();
+        }
+        return $this->view->render($response, '404.phtml', [
+            'msong' => $msong
+        ]);
+        /*return $this->response
             ->withStatus(500)
             ->withHeader('Content-Type', 'text/html')
-            ->write('Page not found!');
+            ->write('Page not found!');*/
     }
 
-    $exts = json_decode( $settings['params']['extensions'], true );
     $mpost = null;
     if (in_array( 'blog', $exts )) {
         $mpost = new \ExtensionsModel\PostModel();

@@ -30,7 +30,6 @@ class SongCordRefferenceModel extends \Model\BaseModel
         // NOTE: you should only define rules for those attributes that
         // will receive user inputs.
         return [
-            ['url', 'required'],
             ['created_at', 'required', 'on'=>'create'],
         ];
     }
