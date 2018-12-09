@@ -41,7 +41,7 @@ jQuery(document).ready(function($) {
     if ($('a.chord').length > 0) {
         var nada_dasar = clean_basic_tone($('a.chord').first().text());
 
-        $('#switch-content').find('#'+nada_dasar).addClass('current-basic-tone');
+        $('#switch-content').find('div[id="'+ nada_dasar +'"]').addClass('current-basic-tone');
         $('#switch-content').find('div').click(function () {
             transpose(clean_basic_tone($('a.chord').first().text()),$(this).text());
             $('#switch-content').find('.current-basic-tone').removeClass('current-basic-tone');
