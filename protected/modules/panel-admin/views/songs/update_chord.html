@@ -18,7 +18,11 @@ Perbarui Chord - {{ App.params.site_name }}
             </div>
             <div class="col-sm-4 text-right">
                 <a class="btn btn-default" href="{{ 'song/chords/view' | link }}">Daftar Postingan</a>
-                <a class="btn btn-default" href="{{ 'kord' | link }}/{{ song.artist_slug }}/{{ song.slug }}" target="_newtab">Lihat Postingan</a>
+                {% set perm = song.slug %}
+                {% if song.chord_permalink %}
+                    {% set perm = song.chord_permalink %}
+                {% endif %}
+                <a class="btn btn-default" href="{{ 'kord' | link }}/{{ song.artist_slug }}/{{ perm }}" target="_newtab">Lihat Postingan</a>
             </div>
         </div>
     </div>
@@ -58,9 +62,9 @@ Perbarui Chord - {{ App.params.site_name }}
             tabfocus_elements : 'major-publishing-actions',
             media_strict : false,
             height: 400,
-            plugins : 'code image imagetools paste codesample',
+            plugins : 'code image imagetools paste codesample anchor',
             menubar : false,
-            toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | pastetext image code codesample',
+            toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | pastetext image code codesample anchor',
             codesample_languages: [
                 {text: 'HTML/XML', value: 'markup'},
                 {text: 'JavaScript', value: 'javascript'},
@@ -151,6 +155,13 @@ Perbarui Chord - {{ App.params.site_name }}
             }
             return false;
         });
+        if($('#s2_tokenization').length) {
+            $('#s2_tokenization').select2({
+                placeholder: "Select...",
+                tags:["90s", "manca", "recommended", "requested"],
+                tokenSeparators: [",", " "]
+            });
+        }
     });
     function getSlug(data){
         var lang = $(data).attr('lang');

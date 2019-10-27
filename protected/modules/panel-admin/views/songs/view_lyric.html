@@ -80,7 +80,7 @@ Daftar Lirik Lagu - {{ App.params.site_name }}
                                                     <a href="{{ 'song/artists/detail' | link }}/{{ song.artist_id }}">{{ song.artist_name }}</a>
                                                 </td>
                                                 <td>
-                                                    {% set song_url = model.buildSongUrl({'artist':song.artist_slug,'title':song.slug}) %}
+                                                    {% set song_url = model.buildSongUrl({'artist':song.artist_slug,'permalink':song.slug}) %}
                                                     <a href="{{ song_url | link }}" target="_newtab">{{ song_url | link }}</a>
                                                 </td>
                                                 <td><center>{{ song.status }}</center></td>
@@ -124,7 +124,7 @@ Daftar Lirik Lagu - {{ App.params.site_name }}
                                                     <a href="{{ 'song/artists/detail' | link }}/{{ approved.artist_id }}">{{ approved.artist_name }}</a>
                                                 </td>
                                                 <td>
-                                                    {% set song_url = model.buildSongUrl({'artist':approved.artist_slug,'title':approved.slug}) %}
+                                                    {% set song_url = model.buildSongUrl({'artist':approved.artist_slug,'permalink':approved.slug}) %}
                                                     <a href="{{ song_url | link }}" target="_newtab">{{ song_url | link }}</a>
                                                 </td>
                                                 <td><center>{{ approved.status }}</center></td>

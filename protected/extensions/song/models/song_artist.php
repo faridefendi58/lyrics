@@ -94,4 +94,14 @@ class SongArtistModel extends \Model\BaseModel
 
         return $items;
     }
+
+    public function getArtistByName($name) {
+        $sql = "SELECT t.* FROM {tablePrefix}ext_song_artists t WHERE LOWER(t.name) =:name";
+
+        $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+
+        $row = \Model\R::getRow( $sql, ['name' => strtolower($name)] );
+
+        return $row;
+    }
 }

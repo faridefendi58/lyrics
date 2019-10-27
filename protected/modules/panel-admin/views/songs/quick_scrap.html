@@ -1,0 +1,197 @@
+{% extends "layout.html" %}
+{% block pagetitle %}
+Quick Scrap - Kunci Gitar - {{ App.params.site_name }}
+{% endblock %}
+
+{% block extended_css %}
+<link rel="stylesheet" href="{{ 'lib/select2/select2.css' | admin_asset_url }}">
+{% endblock %}
+
+{% block content %}
+<div id="main_wrapper">
+    <div class="page_bar clearfix">
+        <div class="row">
+            <div class="col-sm-5">
+                <h1 class="page_title">Scraping Kunci Gitar</h1>
+                <p class="text-muted">Formulir penambahan data kunci gitar</p>
+            </div>
+            <div class="col-sm-7 text-right">
+                <ul class="navbar-nav pull-right" style="list-style-type: none;">
+                    <li class="nav-item" itemprop="url">
+                        <a href="{{ 'song/chords/view' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                            Daftar Kunci Gitar
+                        </a>
+                    </li>
+                    <li class="nav-item" itemprop="url">
+                        <a href="{{ 'song/chords/scraping-task' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                            Daftar Scraping Task
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="page_content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Kolom bertanda <span class="red">*</span> tidak boleh dikosongi
+                        </div>
+                        <div class="panel-body">
+                            {% if message %}
+                            <div class="alert {% if success %}alert-success{% else %}alert-warning{% endif %}">{{ message }}</div>
+                            {% endif %}
+                            <form method="post" name="page-create">
+                                <div class="row">
+                                    <div class="form-group col-sm-2">
+                                        <label>Abjab</label>
+                                        {% set abjads = smodel.getAbjads() %}
+                                        <select name="Songs[abjad_id]" class="form-control" id="abjad-list">
+                                            {% for ab,abjad in abjads %}
+                                            <option value="{{ ab }}"
+                                                    {% if params.abjad_id == ab %}selected{% endif %}>{{ abjad }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-sm-3">
+                                        <label>Artist Name</label>
+                                        <select name="Songs[artist_id]" class="form-control select2-basic" id="artist-list">
+                                            {% for artist in artists %}
+                                            <option value="{{ artist.id }}"
+                                                    attr-url="{{ artist.chord_url }}"
+                                                    attr-section="{{ artist.chord_section }}"
+                                                    {% if params.artist_id == artist.id %}selected{% endif %}>{{ artist.name }} ({{ artist.tot_song }} song)</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-sm-3">
+                                        <label>New Artist Name (<span class="red">Optional</span>)</label>
+                                        <input type="text" name="Songs[artist_name]" class="form-control" id="artist_name" value="{{ params.artist_name }}">
+                                    </div>
+                                    <div class="form-group col-sm-4">
+                                        <label>Song Title <span class="red">*</span></label>
+                                        <input type="text" name="Songs[title]" class="form-control" id="song_title" value="{{ params.title }}">
+                                    </div>
+                                    <div class="form-group col-sm-6">
+                                        <label>Source Website <span class="red">*</span></label>
+                                        <input type="text" name="Songs[src_website]" class="form-control" value="{{ params.src_website }}" id="song_url">
+                                    </div>
+                                    <div class="form-group col-sm-4">
+                                        <label>Chord Section <span class="red">*</span></label>
+                                        <input type="text" name="Songs[chord_section]" class="form-control"
+                                               value="{{ params.chord_section }}" placeholder="Ex: div.entry-content">
+                                        <p class="text-muted">Class or ID of the chord area. Ex: div.entry-content</p>
+                                    </div>
+                                </div>
+
+                                <div class="row song-content" {% if (chord_content | length) == 0 %}style="display:none;"{% endif %}>
+                                    <div class="form-group col-sm-8">
+                                        <textarea class="form-control editor" name="Songs[content]">{{ chord_content | raw }}</textarea>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-sm-12">
+                                        <input type="submit" name="Submit" value="{% if (chord_content | length) == 0 %}Generate{% else %}Simpan Sekarang{% endif %}" class="btn btn-success btn-submit">
+                                    </div>
+                                    {% if (chord_content | length) == 0 %}
+                                    <div class="form-group col-sm-12">
+                                        <label class="checkbox-inline"><input type="checkbox" name="just_save" onclick="return justSave(this);"> Just save the data with manual input of the content.</label>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block endbodyjs %}
+<script src="{{ 'lib/select2/select2.min.js' | admin_asset_url }}"></script>
+<script type="text/javascript" src="{{ 'lib/tinymce/tinymce.min.js' | admin_asset_url }}"></script>
+<script type="text/javascript">
+    $(function () {
+        $('select[id="abjad-list"]').change(function () {
+            var url = window.location.href.split('?')[0];
+            window.location.href = url + "?Songs[abjad_id]="+$(this).val();
+        });
+        if($('.select2-basic').length) {
+            $('.select2-basic').select2({
+                allowClear: true,
+                placeholder: "Pilih ..."
+            });
+        }
+        tinymce.init({
+            selector : '.editor',
+            remove_linebreaks : false,
+            gecko_spellcheck : false,
+            keep_styles : true,
+            accessibility_focus : true,
+            tabfocus_elements : 'major-publishing-actions',
+            media_strict : false,
+            height: 400,
+            plugins : 'code image imagetools paste codesample',
+            menubar : false,
+            toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | pastetext image code codesample',
+            codesample_languages: [
+                {text: 'HTML/XML', value: 'markup'},
+                {text: 'JavaScript', value: 'javascript'},
+                {text: 'CSS', value: 'css'},
+                {text: 'PHP', value: 'php'},
+                {text: 'Ruby', value: 'ruby'},
+                {text: 'Python', value: 'python'},
+                {text: 'Java', value: 'java'},
+                {text: 'C', value: 'c'},
+                {text: 'C#', value: 'csharp'},
+                {text: 'C++', value: 'cpp'}
+            ],
+            images_upload_handler: function (blobInfo, success, failure) {
+                var xhr, formData;
+
+                xhr = new XMLHttpRequest();
+                xhr.withCredentials = false;
+                xhr.open('POST', '{{ "song/chords/direct-upload" | link }}');
+
+                xhr.onload = function() {
+                    var json;
+
+                    if (xhr.status != 200) {
+                        failure('HTTP Error: ' + xhr.status);
+                        return;
+                    }
+
+                    var json = $.parseJSON(xhr.responseText);
+
+                    if (!json || typeof json.location != 'string') {
+                        failure('Invalid JSON: ' + xhr.responseText);
+                        return;
+                    }
+
+                    success(json.location);
+                };
+
+                formData = new FormData();
+                formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+                xhr.send(formData);
+            }
+        });
+    });
+
+    function justSave(dt) {
+        if ($(dt).is(':checked')) {
+            $('input.btn-success').val('Simpan Sekarang');
+            $('.song-content').show();
+        } else {
+            $('input.btn-success').val('Generate');
+            $('.song-content').hide();
+        }
+    }
+</script>
+{% endblock %}

@@ -8,11 +8,11 @@ Daftar Kord Gitar - {{ App.params.site_name }}
 <div id="main_wrapper">
     <div class="page_bar clearfix">
         <div class="row">
-            <div class="col-sm-5">
+            <div class="col-sm-4">
                 <h1 class="page_title">Postingan Kord Gitar</h1>
                 <p class="text-muted">Daftar postingan untuk kord gitar</p>
             </div>
-            <div class="col-sm-7 text-right">
+            <div class="col-sm-8 text-right">
                 <ul class="navbar-nav pull-right" style="list-style-type: none;">
                     <li class="nav-item" itemprop="url">
                         <a href="{{ 'song/chords/create' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
@@ -32,6 +32,11 @@ Daftar Kord Gitar - {{ App.params.site_name }}
                     <li class="nav-item" itemprop="url">
                         <a href="{{ 'song/chords/generate-song' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
                             Generate Judul Lagu
+                        </a>
+                    </li>
+                    <li class="nav-item" itemprop="url">
+                        <a href="{{ 'song/chords/quick-scrap' | link }}" class="nav-link js-scroll-trigger btn btn-default" itemprop="name">
+                            Quick Scrap
                         </a>
                     </li>
                 </ul>
@@ -80,7 +85,7 @@ Daftar Kord Gitar - {{ App.params.site_name }}
                                                     <a href="{{ 'song/artists/detail' | link }}/{{ song.artist_id }}">{{ song.artist_name }}</a>
                                                 </td>
                                                 <td>
-                                                    {% set song_url = model.buildSongUrl({'artist':song.artist_slug,'title':song.slug,'path':'kord'}) %}
+                                                    {% set song_url = model.buildSongUrl({'artist':song.artist_slug,'permalink':song.slug,'path':'kord'}) %}
                                                     <a href="{{ song_url | link }}" target="_newtab">{{ song_url | link }}</a>
                                                 </td>
                                                 <td><center>{{ song.status }}</center></td>
@@ -112,6 +117,7 @@ Daftar Kord Gitar - {{ App.params.site_name }}
                                                 <th>Artist Name</th>
                                                 <th>Permalink</th>
                                                 <th>Status Postingan</th>
+												<th>Dilihat</th>
                                                 <th>&nbsp;</th>
                                             </tr>
                                             </thead>
@@ -124,10 +130,11 @@ Daftar Kord Gitar - {{ App.params.site_name }}
                                                     <a href="{{ 'song/artists/detail' | link }}/{{ approved.artist_id }}">{{ approved.artist_name }}</a>
                                                 </td>
                                                 <td>
-                                                    {% set song_url = model.buildSongUrl({'artist':approved.artist_slug,'title':approved.slug,'path':'kord'}) %}
+                                                    {% set song_url = model.buildSongUrl({'artist':approved.artist_slug,'permalink':approved.chord_permalink,'path':'kord'}) %}
                                                     <a href="{{ song_url | link }}" target="_newtab">{{ song_url | link }}</a>
                                                 </td>
                                                 <td><center>{{ approved.status }}</center></td>
+												<td><center>{{ approved.viewed }}</center></td>
                                                 <td>
                                                     <a href="{{ 'song/chords/update' | link }}/{{ approved.id }}">
                                                         <i class="fa fa-pencil"></i>
@@ -144,6 +151,26 @@ Daftar Kord Gitar - {{ App.params.site_name }}
                                             {% endfor %}
                                             </tbody>
                                         </table>
+                                        {#<table
+                                                data-show-export="false"
+                                                data-pagination="true"
+                                                data-show-pagination-switch="true"
+                                                data-search="true"
+                                                data-toggle="table"
+                                                data-url="{{ 'song/chords/list-view' | link }}/1">
+
+                                            <thead>
+                                            <tr>
+                                                <th data-sortable="true" data-field="id">id</th>
+                                                <th data-field="title">Title</th>
+                                                <th data-field="artist_name">Artist Name</th>
+                                                <th data-field="artist_slug">Permalink</th>
+                                                <th data-field="status">Status Postingan</th>
+                                                <th data-formatter="TableActions" data-align="center">&nbsp;</th>
+                                            </tr>
+                                            </thead>
+
+                                        </table>#}
                                     </div>
                                 </div>
                             </div>
@@ -165,6 +192,7 @@ Daftar Kord Gitar - {{ App.params.site_name }}
 {% block endbodyjs %}
 <script src="{{ 'lib/DataTables/media/js/jquery.dataTables.min.js' | admin_asset_url }}"></script>
 <script src="{{ 'lib/DataTables/media/js/dataTables.bootstrap.js' | admin_asset_url }}"></script>
+
 <script type="text/javascript">
     function hapus(data) {
         if (confirm('Are you sure to delete ?')) {

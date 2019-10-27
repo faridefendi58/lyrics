@@ -59,54 +59,6 @@ $app->get('/[{name}]', function ($request, $response, $args) {
     ]);
 });
 
-$app->post('/kontak-kami', function ($request, $response, $args) {
-    $message = 'Pesan Anda gagal dikirimkan.';
-    $settings = $this->get('settings');
-    if (isset($_POST['Contact'])){
-        //send mail to admin
-        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
-        try {
-            //Server settings
-            $mail->SMTPDebug = 0;
-            $mail->isSMTP();
-            $mail->Host = $settings['params']['smtp_host'];
-            $mail->SMTPAuth = true;
-            $mail->Username = $settings['params']['admin_email'];
-            $mail->Password = $settings['params']['smtp_secret'];
-            $mail->SMTPSecure = $settings['params']['smtp_secure'];
-            $mail->Port = $settings['params']['smtp_port'];
-
-            //Recipients
-            $mail->setFrom( $settings['params']['admin_email'], 'Admin slightSite' );
-            $mail->addAddress( $settings['params']['admin_email'], 'Farid Efendi' );
-            $mail->addReplyTo( $_POST['Contact']['email'], $_POST['Contact']['name'] );
-
-            //Content
-            $mail->isHTML(true);
-            $mail->Subject = '[slightSite] Kontak Kami';
-            $mail->Body = "Halo Admin, 
-	        <br/><br/>
-            Ada pesan baru dari pengunjung dengan data berikut:
-            <br/><br/>
-            <b>Judul pesan</b> : ".$_POST['Contact']['subject']." <br/>
-            <b>Nama pengunjung</b> : ".$_POST['Contact']['name']." <br/> 
-            <b>Alamat Email</b> : ".$_POST['Contact']['email']." <br/>
-            <br/>
-            <b>Isi Pesan</b> :<br/> ".$_POST['Contact']['message']."";
-
-            $mail->send();
-        } catch (Exception $e) {
-            echo 'Message could not be sent.';
-            echo 'Mailer Error: ' . $mail->ErrorInfo;
-            exit;
-        }
-
-        $message = 'Pesan Anda berhasil dikirim. Kami akan segera merespon pesan Anda.';
-    }
-
-    echo $message; exit;
-});
-
 $app->post('/tracking', function ($request, $response, $args) {
     if (isset($_POST['s'])){
         $model = new \Model\VisitorModel('create');
@@ -175,6 +127,21 @@ $app->post('/request-lagu', function ($request, $response, $args) {
         //send mail to admin
         $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
         try {
+            // save to db
+            $model = new \ExtensionsModel\SongRequestModel('create');
+            $model->name = $_POST['Request']['name'];
+            $model->email = $_POST['Request']['email'];
+            $model->song_title = $_POST['Request']['title'];
+            $model->song_artist = $_POST['Request']['artist'];
+            if (isset($_POST['Request']['type'])) {
+                $model->type = $_POST['Request']['type'];
+            }
+            if (isset($_POST['Request']['notes'])) {
+                $model->notes = $_POST['Request']['notes'];
+            }
+            $model->created_at = date("Y-m-d H:i:s");
+            $save = \ExtensionsModel\SongRequestModel::model()->save(@$model);
+
             //Server settings
             $mail->SMTPDebug = 0;
             $mail->isSMTP();

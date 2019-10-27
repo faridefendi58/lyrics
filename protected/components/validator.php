@@ -27,10 +27,10 @@ class Validator
             if ($model->{$attribute} == null) {
                 if (array_key_exists('on', $rule)) {
                     if ($model->getScenario() == $rule['on']) {
-                        $errors[$attribute] = $attribute . ' tidak boleh dikosongi.';
+                        $errors[$attribute] = $model->getAttributeLabel($attribute) . ' tidak boleh dikosongi.';
                     }
                 } else
-                    $errors[$attribute] = $attribute . ' tidak boleh dikosongi.';
+                    $errors[$attribute] = $model->getAttributeLabel($attribute) . ' tidak boleh dikosongi.';
             }
         }
 
@@ -110,12 +110,35 @@ class Validator
         foreach ($attributes as $i => $attribute){
             $data = $model->findByAttributes([$attribute=>$model->{$attribute}]);
             if ($data instanceof \RedBeanPHP\OODBBean){
-                $errors[$attribute] = $attribute.' '.$model->{$attribute}.' sudah terdaftar.';
+                $errors[$attribute] = $model->getAttributeLabel($attribute).' '.$model->{$attribute}.' sudah terdaftar.';
             }
         }
         if (array_key_exists('on', $rule)) {
             if ($model->getScenario() != $rule['on']) {
                 $errors = [];
+            }
+        }
+
+        return $errors;
+    }
+
+    public function compare($attributes, $rule = null)
+    {
+        $model = $this->_bean;
+        $errors = [];
+        foreach ($attributes as $i => $attribute){
+            if (in_array('compare', array_values($rule)) && array_key_exists('compareAttribute', $rule) && is_object($model)) {
+                if (!empty($model->{$attribute})
+                    && !empty($model->{$rule['compareAttribute']})
+                    && $model->{$attribute} != $model->{$rule['compareAttribute']}) {
+                    $errors[$rule['compareAttribute']] = $model->getAttributeLabel($rule['compareAttribute']).' harus sama dengaan '. $model->getAttributeLabel($attribute) .'.';
+                }
+            }
+
+            if (array_key_exists('on', $rule)) {
+                if ($model->getScenario() != $rule['on']) {
+                    unset($errors[$attribute]);
+                }
             }
         }
 

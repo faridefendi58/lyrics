@@ -65,7 +65,7 @@ class SongModel extends \Model\BaseModel
     public function getSongs($data) {
         $sql = "SELECT t.*, a.title AS abjad_name, s.name AS artist_name, s.slug AS artist_slug, s.song_url, s.song_section, 
         g.id AS genre_id, g.title AS genre_name, l.url AS lyric_src_url, l.result AS lyric, l.status AS lyric_status, l.section AS lyric_section,
-        c.url AS chord_src_url, c.result AS chord, c.status AS chord_status, c.section AS chord_section  
+        c.url AS chord_src_url, c.result AS chord, c.status AS chord_status, c.section AS chord_section, c.viewed, c.permalink AS chord_permalink  
         FROM {tablePrefix}ext_song t 
         LEFT JOIN {tablePrefix}ext_song_artists s ON s.id = t.artist_id 
         LEFT JOIN {tablePrefix}ext_song_abjads a ON a.id = s.abjad_id  
@@ -100,9 +100,17 @@ class SongModel extends \Model\BaseModel
         if (isset($data['type'])) {
             if ($data['type'] == 'lyric') {
                 $sql .= ' AND l.result IS NOT NULL';
+                if (isset($data['top_track'])) {
+                    $sql .= ' AND l.top_track =:top_track';
+                    $params['top_track'] = $data['top_track'];
+                }
             }
             if ($data['type'] == 'chord') {
                 $sql .= ' AND c.result IS NOT NULL';
+                if (isset($data['top_track'])) {
+                    $sql .= ' AND c.top_track =:top_track';
+                    $params['top_track'] = $data['top_track'];
+                }
             }
         }
 
@@ -111,6 +119,12 @@ class SongModel extends \Model\BaseModel
                 $sql .= ' AND c.featured = 1';
             } else {
                 $sql .= ' AND l.featured = 1';
+            }
+        }
+
+        if (isset($data['tag'])) {
+            if (isset($data['type']) && $data['type'] == 'chord') {
+                $sql .= ' AND c.tags LIKE "%'. $data['tag'] .'%"';
             }
         }
 
@@ -200,8 +214,8 @@ class SongModel extends \Model\BaseModel
         l.url AS lyric_url, l.result AS lyric, l.status AS lyric_status, l.section AS lyric_section, 
         c.url AS chord_url, c.result AS chord, c.status AS chord_status, c.section AS chord_section,
         ab.album_name, ab.release_year, ab.label_name,
-        l.permalink AS lyric_permalink, l.meta_title AS lyric_meta_title, l.meta_keyword AS lyric_meta_keyword, l.meta_description AS lyric_meta_description,      
-        c.permalink AS chord_permalink, c.meta_title AS chord_meta_title, c.meta_keyword AS chord_meta_keyword, c.meta_description AS chord_meta_description      
+        l.permalink AS lyric_permalink, l.meta_title AS lyric_meta_title, l.meta_keyword AS lyric_meta_keyword, l.meta_description AS lyric_meta_description, l.featured, l.top_track,     
+        c.permalink AS chord_permalink, c.meta_title AS chord_meta_title, c.meta_keyword AS chord_meta_keyword, c.meta_description AS chord_meta_description, c.featured, c.top_track, c.tags      
         FROM {tablePrefix}ext_song t 
         LEFT JOIN {tablePrefix}ext_song_artists s ON s.id = t.artist_id 
         LEFT JOIN {tablePrefix}ext_song_abjads a ON a.id = s.abjad_id 
@@ -247,8 +261,13 @@ class SongModel extends \Model\BaseModel
     }
 
     public function buildSongUrl($data) {
-        $url = $data['title'];
-        $song = self::getSong($data['title']);
+        if (!array_key_exists('permalink', $data) && array_key_exists('title', $data)) {
+            $url = $data['title'];
+            $song = self::getSong($data['title']);
+        } else {
+            $url = $data['permalink'];
+            $song = null;
+        }
 
         if (isset($data['artist'])) {
             $url = $data['artist'].'/'.$url;
@@ -258,6 +277,7 @@ class SongModel extends \Model\BaseModel
         if (isset($data['path'])) {
             $path = $data['path'];
         }
+
         switch ($path) {
             case 'lirik':
                 if (is_array($song) && isset($song['lyric_permalink'])) {
@@ -308,7 +328,9 @@ class SongModel extends \Model\BaseModel
 
     public function getImage($slug) {
         $file = $_SERVER['DOCUMENT_ROOT'].'/uploads/songs/'.$slug;
-        if (file_exists($file.'.jpg')) {
+        if (file_exists($file.'.webp')) {
+            return 'uploads/songs/'.$slug.'.webp';
+        } elseif (file_exists($file.'.jpg')) {
             return 'uploads/songs/'.$slug.'.jpg';
         } elseif (file_exists($file.'.png')) {
             return 'uploads/songs/'.$slug.'.png';
@@ -336,7 +358,7 @@ class SongModel extends \Model\BaseModel
                 WHERE t.status=:status l.id IS NOT NULL";
             } elseif ($data['type'] == 'chord') {
                 $sql = "SELECT t.*, s.name AS artist_name, s.slug AS artist_slug, 
-                c.result AS chord   
+                c.result AS chord, c.permalink AS chord_permalink   
                 FROM {tablePrefix}ext_song t 
                 LEFT JOIN {tablePrefix}ext_song_artists s ON s.id = t.artist_id  
                 LEFT JOIN {tablePrefix}ext_song_chord_refferences c ON c.song_id = t.id 
@@ -380,7 +402,8 @@ class SongModel extends \Model\BaseModel
     }
 
     public function getArtists($data=null) {
-        $sql = "SELECT t.name AS artist_name, t.slug AS artist_slug, COUNT(s.id) AS tot_song  
+        $sql = "SELECT t.name AS artist_name, t.slug AS artist_slug, COUNT(s.id) AS tot_song, 
+          COUNT(c.id) AS tot_chord, COUNT(l.id) AS tot_lyric  
           FROM {tablePrefix}ext_song s 
           LEFT JOIN {tablePrefix}ext_song_artists t ON t.id = s.artist_id 
           LEFT JOIN {tablePrefix}ext_song_chord_refferences c ON c.song_id = s.id 
@@ -394,17 +417,30 @@ class SongModel extends \Model\BaseModel
         }
 
         if ($data['has_chord']) {
-            $sql .= ' AND c.id IS NOT NULL';
+            $sql .= ' AND c.id IS NOT NULL AND c.status ="approved"';
         }
 
         if ($data['has_lyric']) {
             $sql .= ' AND l.id IS NOT NULL';
         }
 
+        if ($data['genre_id']) {
+            $sql .= ' AND s.genre_id =:genre_id';
+            $params['genre_id'] = $data['genre_id'];
+        }
+
         $sql .= ' GROUP BY s.artist_id';
 
         if ($data['has_song']) {
             $sql .= ' HAVING tot_song > 0';
+        }
+
+        if ($data['order_by']) {
+            $sql .= ' ORDER BY t.'. $data['order_by'];
+        }
+
+        if ($data['limit']) {
+            $sql .= ' LIMIT '. $data['limit'];
         }
 
         $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
@@ -574,7 +610,7 @@ class SongModel extends \Model\BaseModel
                     array_push($artists, $row['artist_slug']);
                 }
                 $items[] = [
-                    'loc' => $url_origin.'/'.$this->buildSongUrl(['path' => 'lirik', 'artist' => $row['artist_slug'], 'title' => $row['slug']]), //$url_origin.'/lirik/'.$row['artist_slug'].'/'.$row['slug'],
+                    'loc' => $url_origin.'/'.$this->buildSongUrl(['path' => 'lirik', 'artist' => $row['artist_slug'], 'permalink' => $row['lyric_permalink']]),
                     'lastmod' => date("c", strtotime($row['last_lyric_update'])),
                     'priority' => ($row['lyric_featured'] > 0)? 0.6 : 0.5
                 ];
@@ -596,7 +632,7 @@ class SongModel extends \Model\BaseModel
                         array_push($artist_chords, $row['artist_slug']);
                     }
                     $items[] = [
-                        'loc' => $url_origin.'/'.$this->buildSongUrl(['path' => 'kord', 'artist' => $row['artist_slug'], 'title' => $row['slug']]), //$url_origin.'/kord/'.$row['artist_slug'].'/'.$row['slug'],
+                        'loc' => $url_origin.'/'.$this->buildSongUrl(['path' => 'kord', 'artist' => $row['artist_slug'], 'permalink' => $row['chord_permalink']]),
                         'lastmod' => date("c", strtotime($row['last_chord_update'])),
                         'priority' => ($row['chord_featured'] > 0)? 0.6 : 0.5
                     ];

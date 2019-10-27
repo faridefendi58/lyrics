@@ -2,6 +2,7 @@
 namespace ExtensionsModel;
 
 use Model\R;
+use PHPMailer\PHPMailer\Exception;
 
 require_once __DIR__ . '/../../../models/base.php';
 
@@ -58,5 +59,44 @@ class SongCordRefferenceModel extends \Model\BaseModel
         $rows = \Model\R::getAll( $sql, $params );
 
         return $rows;
+    }
+
+    public function recordVisit($slug, $song_id = 0)
+    {
+        $ip_address = $_SERVER['REMOTE_ADDR'];
+        $must_save = false;
+
+        $delay = 60*5; // 5 minutes
+
+        if (!empty($_SESSION[$slug][$ip_address])) {
+            if (time() > $_SESSION[$slug][$ip_address]) {
+                $_SESSION[$slug][$ip_address] = time() + $delay;
+                $must_save = true;
+            }
+        } else {
+            $_SESSION[$slug][$ip_address] = time() + $delay;
+            $must_save = true;
+        }
+
+        if ($must_save) {
+            $sql = "UPDATE {tablePrefix}ext_song_chord_refferences t 
+              SET t.viewed = t.viewed + 1 ";
+
+            if ($song_id > 0) {
+                $sql .= " WHERE t.song_id =:song_id";
+                $params = [ 'song_id' => $song_id ];
+            } else {
+                $sql .= " WHERE t.permalink =:permalink";
+                $params = [ 'permalink' => $slug ];
+            }
+
+            $sql = str_replace(['{tablePrefix}'], [$this->_tbl_prefix], $sql);
+            try {
+                $exec = \Model\R::exec( $sql, $params );
+            } catch (\Exception $exception) {
+            }
+        }
+
+        return true;
     }
 }

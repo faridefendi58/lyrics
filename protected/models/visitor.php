@@ -279,4 +279,39 @@ class VisitorModel extends \Model\BaseModel
                 break;
         }
     }
+
+    public function getFrequentlySearch($data = [])
+    {
+        $sql = "SELECT REPLACE(url, '{kordSeachUrl}', '') AS song_title, COUNT(id) AS counter, created_at 
+        FROM {tablePrefix}visitor 
+        WHERE url LIKE '%kord/search?q=%'";
+
+        $date_from = date("Y-m-01");
+        if (isset($data['date_from'])) {
+            $date_from = date("Y-m-d", strtotime($data['date_from']));
+        }
+
+        $date_to = date("Y-m-d");
+        if (isset($data['date_to'])) {
+            $date_to = date("Y-m-d", strtotime($data['date_to']));
+        }
+
+        $sql .= " AND DATE_FORMAT(created_at, '%Y-%m-%d') BETWEEN :date_from AND :date_to";
+
+        $params = [
+            'date_from' => $date_from,
+            'date_to' => $date_to
+        ];
+
+        $sql .= " GROUP BY url ORDER BY counter DESC";
+
+        if (isset($data['limit']))
+            $sql .= ' LIMIT '.$data['limit'];
+
+        $sql = str_replace(['{tablePrefix}', '{kordSeachUrl}'], [$this->_tbl_prefix, $data['site_url'].'/kord/search?q='], $sql);
+
+        $rows = \Model\R::getAll( $sql, $params );
+
+        return $rows;
+    }
 }

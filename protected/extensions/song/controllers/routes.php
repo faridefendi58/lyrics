@@ -73,6 +73,10 @@ $app->get('/lirik[/{artist}[/{title}]]', function ($request, $response, $args) {
             }
         }
 
+        // save the counter
+        $lrmodel = new \ExtensionsModel\SongLyricRefferenceModel();
+        $record = $lrmodel->recordVisit($args['title'], $data['id']);
+
         return $this->view->render($response, 'song_lyric.phtml', [
             'data' => $data,
             'msong' => $model
@@ -124,24 +128,82 @@ $app->get('/kord[/{artist}[/{title}]]', function ($request, $response, $args) {
             ]);
         }
     } else {
-        $data = $model->getSong($args['title']);
+        $use_cached = false;
+        if (array_key_exists('artist', $args)
+            && array_key_exists('use_cached_file', $this->settings['params'])
+            && $this->settings['params']['use_cached_file']) {
+
+            $dir = 'protected/data/songs/';
+            $file = $dir. $args['artist'].'_'.$args['title'].'.json';
+            if(!file_exists($file)) {
+                $data = $model->getSong($args['title']);
+                if (!empty($data['chord_permalink']) && $data['chord_permalink'] == $args['title']) {
+                    $new_file = fopen($file, "w");
+                    file_put_contents($file, json_encode($data));
+                    $use_cached = true;
+                }
+            } else {
+                $data = file_get_contents($file);
+                if (empty($data)) {
+                    $data = $model->getSong($args['title']);
+                    file_put_contents($file, json_encode($data));
+                    $use_cached = true;
+                } else {
+                    $data = json_decode($data, true);
+                    if (!empty($data['chord_permalink']) && $data['chord_permalink'] == $args['title']) {
+                        $use_cached = true;
+                    } else {
+                        unlink($file);
+                    }
+                }
+            }
+        }
+
+        if (!$use_cached) {
+            $data = $model->getSong($args['title']);
+        }
+
         if (empty($data)) {
             // check by title
             $data = $model->getSongByTitle(strtolower($args['title']), $args['artist']);
 
-            if (!empty($data['chord_permalink']))
-                return $response->withRedirect('/kord/'.$args['artist'].'/'.$data['chord_permalink']);
-            else
-                return $response->withRedirect('/kord/'.$args['artist'].'/'.$data['chord_slug']);
+            if (!empty($data['chord_permalink'])) {
+                return $response->withRedirect('/kord/' . $args['artist'] . '/' . $data['chord_permalink']);
+            } else {
+                return $response->withRedirect('/kord/' . $args['artist'] . '/' . $data['chord_slug']);
+            }
         } else {
             if (!empty($data['chord_permalink']) && $data['chord_permalink'] != $args['title']) {
+                // remove unused cached if any
                 return $response->withRedirect('/kord/'.$args['artist'].'/'.$data['chord_permalink']);
             }
         }
 
+        // save the counter
+        $crmodel = new \ExtensionsModel\SongCordRefferenceModel();
+        $record = $crmodel->recordVisit($args['title'], $data['id']);
+
         return $this->view->render($response, 'song_chord.phtml', [
             'data' => $data,
             'msong' => $model
+        ]);
+    }
+
+    return $this->view->render($response, '404.phtml');
+});
+
+$app->get('/genre/[{genre_slug}]', function ($request, $response, $args) {
+    $theme = $this->settings['theme'];
+    $model = \ExtensionsModel\SongGenreModel::model()->findByAttributes(['slug' => $args['genre_slug']]);
+
+    if ($model instanceof \RedBeanPHP\OODBBean) {
+        $smodel = new \ExtensionsModel\SongModel();
+        $data = $smodel->getArtists(['genre_id' => $model->id, 'has_chord' => 1]);
+
+        return $this->view->render($response, 'genre_artist.phtml', [
+            'data' => $data,
+            'model' => $model,
+            'msong' => $smodel
         ]);
     }
 
@@ -174,6 +236,12 @@ $app->group('/song', function () use ($user) {
     });
     $this->group('/chords', function() use ($user) {
         new Extensions\Controllers\ChordsController($this, $user);
+    });
+    $this->group('/requests', function() use ($user) {
+        new Extensions\Controllers\RequestsController($this, $user);
+    });
+    $this->group('/genres', function() use ($user) {
+        new Extensions\Controllers\GenresController($this, $user);
     });
 });
 

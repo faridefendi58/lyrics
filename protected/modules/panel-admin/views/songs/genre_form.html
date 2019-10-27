@@ -1,0 +1,54 @@
+<form method="post" id="genre-form"
+      action="{% if model %}{{ 'song/genres/update' | link }}/{{ model.id }}{% else %}{{ 'song/genres/create' | link }}{% endif %}"
+      enctype="multipart/form-data">
+
+    <div class="alert alert-success" style="display: none;"></div>
+    <div class="alert alert-warning" style="display: none;"></div>
+
+    <div class="form-group">
+        <label class="control-label">Title <span class="red">*</span></label>
+        <input type="text" name="SongGenre[title]" class="form-control required" value="{{ model.title }}">
+    </div>
+
+    <div class="form-group">
+        <label class="control-label">Description <span class="red">*</span></label>
+        <textarea name="SongGenre[description]" class="form-control required">{{ model.title }}</textarea>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label">Image <span class="red">*</span></label>
+        {% if model.image %}
+        <img src="{{ model.image | link }}" width="200px"/>
+        {% endif %}
+        <div class="fileupload fileupload-new" data-provides="fileupload">
+            <div class="input-append">
+                <div class="uneditable-input">
+                    <i class="glyphicon glyphicon-file fileupload-exists"></i>
+                    <span class="fileupload-preview"></span>
+                </div>
+                <span class="btn btn-default btn-file">
+                                                <span class="fileupload-new">Select file</span>
+                                                <span class="fileupload-exists">Change</span>
+                                                <input type="file" name="SongGenre[image]" class="reviewer-image"/>
+                                            </span>
+                <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">Remove</a>
+            </div>
+        </div>
+        <div class="clearfix mb15"></div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label">Status <span class="red">*</span></label>
+        {% set statuses = App.call.model("\\ExtensionsModel\\SongGenreModel", 'getStatuses', {}) %}
+        <select name="SongGenre[status]" class="form-control required">
+            {% for status_id, status_name in statuses %}
+            <option value="{{ status_id }}" {% if status_id == model.status %}selected="selected"{% endif %}>{{ status_name }}</option>
+            {% endfor %}
+        </select>
+        <div class="clearfix mb10"></div>
+    </div>
+
+    <div class="form-group">
+        <input type="submit" name="Submit" value="Simpan" class="btn btn-success btn-submit" onclick="return saveGenre(this);">
+    </div>
+</form>

@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+{% block pagetitle %}
+Update Genre - {{ App.params.site_name }}
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ 'css/bootstrap-fileupload.min.css' | admin_asset_url }}" />
+
+<div id="main_wrapper">
+    <div class="page_bar clearfix">
+        <div class="row">
+            <div class="col-sm-10">
+                <h1 class="page_title">Update Genre #{{ model.id }}</h1>
+                <p class="text-muted">Update genre</p>
+            </div>
+            <div class="col-sm-2 text-right">
+                <a class="btn btn-default" href="{{ 'song/genres/view' | link }}">Daftar Genre</a>
+            </div>
+        </div>
+    </div>
+    <div class="page_content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Kolom bertanda <span class="red">*</span> tidak boleh dikosongi
+                        </div>
+                        <div class="panel-body">
+                            {% include 'songs/genre_form.html' with {'model':model} %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% include 'partial/right_menu.html' %}
+{% endblock %}
+{% block endbodyjs %}
+<script src="{{ 'js/bootstrap-fileupload.min.js' | admin_asset_url }}"></script>
+<script type="text/javascript">
+    function saveGenre(dt) {
+        var validate = jb_validation.validate($('form[id="genre-form"]'));
+        if (!validate) {
+            return false;
+        }
+
+        var formData = new FormData($('form[id="genre-form"]')[0]);
+        var url = $(dt).parent().parent().attr('action');
+
+        $.ajax({
+            'url': url,
+            'type':'post',
+            'data': formData,
+            'dataType': 'json',
+            'async': false,
+            'success': function(data) {
+                console.log(data);
+                if (data.status == 'success') {
+                    var alert_success = $('#genre-form').find('.alert-success');
+                    var alert_warning = $('#genre-form').find('.alert-warning');
+                    alert_success.html(data.message);
+                    alert_success.show();
+                    alert_warning.hide();
+                    $('form[id="genre-form"]').find('.form-group').hide();
+                    setTimeout(function () {
+                        window.location.reload(true);
+                    }, 5000);
+                }
+            },
+            'errors': function (request, status, error) {
+                console.log(request.responseText);
+            },
+            'cache': false,
+            'contentType': false,
+            'processData': false
+        });
+
+        return false;
+    }
+</script>
+{% endblock %}

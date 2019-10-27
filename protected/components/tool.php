@@ -98,7 +98,29 @@ class Tool
             $smodel = new \ExtensionsModel\SongModel();
             $songs = $smodel->getSitemaps();
             $results = array_merge($results, $songs);
+
+            $sgmodel = new \ExtensionsModel\SongGenreModel();
+            $genres = $sgmodel->getSitemaps();
+            $results = array_merge($results, $genres);
         }
         return $results;
+    }
+
+    public function getCachedData($data = []) {
+        $dir = 'protected/data';
+        if (array_key_exists('cached_name', $data)) {
+            $file_name = $data['cached_name'];
+            if (array_key_exists('dir', $data)) {
+                $dir = $data['dir'];
+            }
+
+            if (file_exists($dir.'/'.$file_name.'.json')) {
+                $content = file_get_contents($dir.'/'.$file_name.'.json');
+
+                return json_decode($content, false);
+            }
+        }
+
+        return false;
     }
 }
