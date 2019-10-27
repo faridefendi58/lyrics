@@ -827,7 +827,7 @@ class ChordsController extends BaseController
                     var_dump($e->getMessage()); exit;
                 }
 
-                if (strpos($params['Songs']['src_website'], 'chordtela.com') !== false) {
+                if (strpos($params['Songs']['src_website'], 'rdtela.co') !== false) {
                     $chord_section = $html->find($params['Songs']['chord_section'], 0);
 
                     if (strpos($chord_section->outertext, "<meta") != false) {
@@ -849,7 +849,7 @@ class ChordsController extends BaseController
                     }
 
                     $chord_content = $chord_section->innertext;
-                } elseif (strpos($params['Songs']['src_website'], 'kordindonesia.com') !== false) {
+                } elseif (strpos($params['Songs']['src_website'], 'rdindonesia.co') !== false) {
                     $chord_section = $html->find($params['Songs']['chord_section'], 0);
                     if (strpos($chord_section->outertext, "<h5") != false) {
                         $metas = $chord_section->find('h5');
@@ -863,12 +863,12 @@ class ChordsController extends BaseController
                     }
 
                     $chord_content = $chord_section->innertext;
-                } elseif (strpos($params['Songs']['src_website'], 'chordvisa.com') !== false) {
+                } elseif (strpos($params['Songs']['src_website'], 'ordvisa.co') !== false) {
                     $chord_section = $html->find($params['Songs']['chord_section'], 0);
 
                     $chord_content = $chord_section->innertext;
                     $chord_content = str_replace("&nbsp; &nbsp;", "&nbsp;", $chord_content);
-                } elseif (strpos($params['Songs']['src_website'], 'chords-and-tabs.net') !== false) {
+                } elseif (strpos($params['Songs']['src_website'], 'ords-and-tab') !== false) {
                     $chord_section = $html->find($params['Songs']['chord_section'], 0);
 
                     if (strpos($chord_section->outertext, "<sup") != false) {
