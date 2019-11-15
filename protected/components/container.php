@@ -9,6 +9,9 @@ $user = new \Components\UserIdentity($app);
 // Controller
 require __DIR__ . '/controller.php';
 
+// Api Controller
+require __DIR__ . '/api_controller.php';
+
 // Tool
 require __DIR__ . '/tool.php';
 
