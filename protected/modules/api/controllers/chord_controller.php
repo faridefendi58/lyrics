@@ -40,12 +40,12 @@ class ChordController extends BaseController
 
         $result = [];
         $params = $request->getParams();
-        $params['limit'] = 100;
+        if (!array_key_exists('limit', $params)) {
+            $params['limit'] = 100;
+        }
         $params['type'] = 'chord';
         $model = new \ExtensionsModel\SongModel();
         $items = $model->getSearch($params);
-        $result = $items;
-
         if (is_array($items)){
             $result['success'] = 1;
             $result['data'] = $items;
