@@ -358,10 +358,11 @@ class SongModel extends \Model\BaseModel
                 WHERE t.status=:status l.id IS NOT NULL";
             } elseif ($data['type'] == 'chord') {
                 $sql = "SELECT t.*, s.name AS artist_name, s.slug AS artist_slug, 
-                c.result AS chord, c.permalink AS chord_permalink   
+                c.result AS chord, c.permalink AS chord_permalink, g.title AS genre_name   
                 FROM {tablePrefix}ext_song t 
                 LEFT JOIN {tablePrefix}ext_song_artists s ON s.id = t.artist_id  
                 LEFT JOIN {tablePrefix}ext_song_chord_refferences c ON c.song_id = t.id 
+                LEFT JOIN {tablePrefix}ext_song_genres g ON g.id = t.genre_id 
                 WHERE t.status=:status AND c.id IS NOT NULL";
             }
         }
