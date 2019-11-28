@@ -150,6 +150,14 @@ $app->get('/kord[/{artist}[/{title}]]', function ($request, $response, $args) {
                     $use_cached = true;
                 } else {
                     $data = json_decode($data, true);
+                    /*if (!array_key_exists('mp3_url', $data)) {
+                        $data2 = $model->getSong($args['title']);
+                        if (!is_writable($file)) {
+                            unlink($file);
+                            $new_file = fopen($file, "w");
+                        }
+                        file_put_contents($file, json_encode($data2));
+                    }*/
                     if (!empty($data['chord_permalink']) && $data['chord_permalink'] == $args['title']) {
                         $use_cached = true;
                     } else {

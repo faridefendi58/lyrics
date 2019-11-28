@@ -32,6 +32,7 @@ class ChordsController extends BaseController
         $app->map(['GET', 'POST'], '/list-view/[{approved}]', [$this, 'list_view']);
         $app->map(['GET'], '/generate-cache', [$this, 'generate_cache']);
         $app->map(['GET', 'POST'], '/import-json', [$this, 'import_json']);
+        $app->map(['GET', 'POST'], '/recovery', [$this, 'recovery']);
     }
 
     public function accessRules()
@@ -40,7 +41,7 @@ class ChordsController extends BaseController
             ['allow',
                 'actions' => ['view', 'create', 'update', 'delete',
                     'generate-song', 'generate-artist', 'delete-artist', 'delete-song',
-                    'quick-scrap', 'import-json'],
+                    'quick-scrap', 'import-json', 'recovery'],
                 'users'=> ['@'],
             ],
             ['deny',
@@ -1246,5 +1247,117 @@ class ChordsController extends BaseController
             'success' => $success,
             'failed_data' => (count($failed_to_save) > 0)? implode(", ", $failed_to_save) : null
         ]);
+    }
+
+    public function recovery($request, $response, $args)
+    {
+        $isAllowed = $this->isAllowed($request, $response);
+        if ($isAllowed instanceof \Slim\Http\Response)
+            return $isAllowed;
+
+        if (!$isAllowed) {
+            return $this->notAllowedAction();
+        }
+
+        $smodel = new \ExtensionsModel\SongModel();
+        $samodel = new \ExtensionsModel\SongArtistModel();
+        $artist_slugs = $samodel->getSlugs();
+
+        $slugs = $smodel->getSlugs();
+        $items = [];
+        $artists = [];
+        $chords = [];
+        foreach(glob( $this->_settings['basePath']. '/data/songs/*.json') as $jfile) {
+            $pathinfo = pathinfo($jfile);
+            $content = file_get_contents($jfile);
+            if (!empty($content)) {
+                $json_data = json_decode($content, true);
+                if ($json_data['id'] == 523) {
+                    $scmodel = \ExtensionsModel\SongCordRefferenceModel::model()->findByAttributes(['song_id' => 523]);
+                    $scmodel->result = $json_data['chord'];
+                    $scmodel->permalink = $json_data['chord_permalink'];
+                    $scmodel->meta_title = $json_data['chord_meta_title'];
+                    $scmodel->meta_keyword = $json_data['chord_meta_keyword'];
+                    $scmodel->meta_description = $json_data['chord_meta_description'];
+                    $pdate = \ExtensionsModel\SongCordRefferenceModel::model()->update($scmodel);
+                    var_dump($json_data); exit;
+                }
+                if (is_array($json_data) && array_key_exists('slug', $json_data) && !in_array($json_data['slug'], $slugs)) {
+                    $items[] = $json_data;
+                    $chords[$json_data['id']] = $json_data;
+                    // create artist data
+                    $artist = \ExtensionsModel\SongArtistModel::model()->findByPk($json_data['artist_id']);
+                    if (!$artist instanceof \RedBeanPHP\OODBBean && !in_array($json_data['artist_slug'], $artist_slugs)) {
+                        $artists[$json_data['artist_id']] = [
+                            'id' => $json_data['artist_id'],
+                            'artist_name' => $json_data['artist_name'],
+                            'artist_slug' => $json_data['artist_slug']
+                        ];
+                    }
+                }
+            }
+        }
+
+        ksort($chords);
+        ksort($artists);
+        $abmodel = new \ExtensionsModel\SongAbjadModel();
+        $alphabets = $abmodel->getItems();
+        /*foreach ($artists as $i => $artist) {
+            $amodel = new \ExtensionsModel\SongArtistModel();
+            $amodel->name = $artist['artist_name'];
+            $amodel->slug = $artist['artist_slug'];
+            $amodel->abjad_id = array_search (substr(ucwords($amodel->name), 0, 1), $alphabets);
+            $amodel->song_url = $i;
+            $amodel->created_at = date("Y-m-d H:i:s");
+            $amodel->updated_at = date("Y-m-d H:i:s");
+            $save = \ExtensionsModel\SongArtistModel::model()->save(@$amodel);
+            if ($save) {
+                $artists[$i]['saved_id'] = $amodel->id;
+            } else {
+                $errors = \ExtensionsModel\SongArtistModel::model()->getErrors(true, true);
+                var_dump($errors);
+            }
+        }*/
+
+        //save the song
+        /*foreach ($chords as $it => $item) {
+            $smodel = new \ExtensionsModel\SongModel();
+            //$smodel->id = $item['id'];
+            $smodel->title = $item['title'];
+            $smodel->slug = $item['slug'];
+            $smodel->artist_id = $item['artist_id'];
+            $smodel->genre_id = $item['genre_id'];
+            $smodel->album_id = $item['album_id'];
+            $smodel->story = $item['id']; //$item['story'];
+            $smodel->status = $item['status'];
+            $smodel->published_at = $item['published_at'];
+            $smodel->created_at = $item['created_at'];
+            $smodel->updated_at = $item['updated_at'];
+            $save2 = \ExtensionsModel\SongModel::model()->save(@$smodel);
+            if ($save2) {
+                $scmodel = new \ExtensionsModel\SongCordRefferenceModel();
+                $scmodel->song_id = $item['id'];
+                $scmodel->url = '#';
+                $scmodel->section = '#';
+                $scmodel->result = $item['chord'];
+                $scmodel->permalink = $item['chord_permalink'];
+                $scmodel->meta_title = $item['chord_meta_title'];
+                $scmodel->meta_keyword = $item['chord_meta_keyword'];
+                $scmodel->meta_description = $item['chord_meta_description'];
+                $scmodel->featured = 0;
+                $scmodel->top_track = 1;
+                $scmodel->status = $item['chord_status'];
+                $scmodel->executed_at = $item['updated_at'];
+                $scmodel->approved_at = $item['updated_at'];
+                $scmodel->created_at = $item['created_at'];
+                $scmodel->updated_at = $item['updated_at'];
+                $save3 = \ExtensionsModel\SongCordRefferenceModel::model()->save($scmodel);
+                if ($save3 > 0) {
+
+                }
+            }
+        }*/
+
+        return $response->withJson(['songs' => $items, 'artits' => $artists], 201);
     }
 }

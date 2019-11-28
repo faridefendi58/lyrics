@@ -151,7 +151,8 @@ class SongModel extends \Model\BaseModel
         c.result AS chord, c.status AS chord_status,
         ab.album_name, ab.release_year, ab.label_name,
         l.permalink AS lyric_permalink, l.meta_title AS lyric_meta_title, l.meta_keyword AS lyric_meta_keyword, l.meta_description AS lyric_meta_description,      
-        c.permalink AS chord_permalink, c.meta_title AS chord_meta_title, c.meta_keyword AS chord_meta_keyword, c.meta_description AS chord_meta_description    
+        c.permalink AS chord_permalink, c.meta_title AS chord_meta_title, c.meta_keyword AS chord_meta_keyword, c.meta_description AS chord_meta_description,
+        m.mp3_url, m.video_url    
         FROM {tablePrefix}ext_song t 
         LEFT JOIN {tablePrefix}ext_song_artists s ON s.id = t.artist_id 
         LEFT JOIN {tablePrefix}ext_song_abjads a ON a.id = s.abjad_id 
@@ -159,6 +160,7 @@ class SongModel extends \Model\BaseModel
         LEFT JOIN {tablePrefix}ext_song_albums ab ON ab.id = t.album_id  
         LEFT JOIN {tablePrefix}ext_song_lyric_refferences l ON l.song_id = t.id  
         LEFT JOIN {tablePrefix}ext_song_chord_refferences c ON c.song_id = t.id  
+        LEFT JOIN {tablePrefix}ext_song_media_refferences m ON m.song_id = t.id  
         WHERE t.slug =:slug";
 
 
@@ -472,13 +474,13 @@ class SongModel extends \Model\BaseModel
         if (!empty($data['song_id']) && !empty($data['type'])) {
             $sql = '';
             if ($data['type'] == 'chord') {
-                $sql .= "SELECT t.*, s.title, s.slug, 
+                $sql .= "SELECT t.id, t.permalink, s.title, s.slug, 
                 a.name AS artist_name, a.slug AS artist_slug, s.published_at   
                 FROM {tablePrefix}ext_song_chord_refferences t 
                 LEFT JOIN {tablePrefix}ext_song s ON s.id = t.song_id
                 LEFT JOIN {tablePrefix}ext_song_artists a ON a.id = s.artist_id";
             } elseif ($data['type'] == 'lyric') {
-                $sql .= "SELECT t.*, s.title, s.slug, 
+                $sql .= "SELECT t.id, t.permalink, s.title, s.slug, 
                 a.name AS artist_name, a.slug AS artist_slug, s.published_at 
                 FROM {tablePrefix}ext_song_lyric_refferences t 
                 LEFT JOIN {tablePrefix}ext_song s ON s.id = t.song_id
