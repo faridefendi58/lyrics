@@ -1085,18 +1085,25 @@ class ChordsController extends BaseController
         foreach ($jobs as $i => $job) {
             $qry = http_build_query($job);
             $url = $this->_settings['params']['site_url'] .'/song/chords/generate-cache?'. $qry;
-            $ch = curl_init();
+			if (function_exists('curl_version')) {
+		        $ch = curl_init();
 
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_URL, $url);
+		        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		        curl_setopt($ch, CURLOPT_URL, $url);
 
-            if(curl_exec($ch) === false) {
-                echo 'Curl error: ' . curl_error($ch);
-            } else {
-                $success = $success + 1;
-            }
-            curl_close($ch);
+		        if(curl_exec($ch) === false) {
+		            echo 'Curl error: ' . curl_error($ch);
+		        } else {
+		            $success = $success + 1;
+		        }
+		        curl_close($ch);
+			} else {
+				$html = file_get_html($url);
+				$html->clear();
+                unset($html);
+				$success = $success + 1;
+			}
         }
 
         // also update cached song

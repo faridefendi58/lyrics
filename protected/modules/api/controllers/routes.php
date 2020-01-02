@@ -22,6 +22,9 @@ $app->group('/api', function () use ($user) {
     $this->group('/chord', function() use ($user) {
         new Api\Controllers\ChordController($this, $user);
     });
+	$this->group('/artist', function() use ($user) {
+        new Api\Controllers\ArtistController($this, $user);
+    });
 });
 
 ?>

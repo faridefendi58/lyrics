@@ -182,7 +182,7 @@
                         {% if song.chord_meta_description %}
                             {% set meta_description = song.chord_meta_description %}
                         {% else %}
-                            {% set meta_description = 'Lihat kunci gitar '~ song.artist_name ~' '~ song.title ~' dari nada dasar .' %}
+                            {% set meta_description = 'Chord kunci gitar '~ song.artist_name ~' '~ song.title ~' dari nada dasar .' %}
                         {% endif %}
                     {% endif %}
                     <textarea name="Songs[meta_description]" class="form-control"

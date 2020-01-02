@@ -29,8 +29,8 @@ Kelola Data Kontak - {{ App.name }}
                                         <th>id</th>
                                         <th>Nama</th>
                                         <th>Email</th>
-                                        <th>Phone</th>
                                         <th>Pesan</th>
+                                        <th>Created At</th>
                                         <th>&nbsp;</th>
                                     </tr>
                                     </thead>
@@ -40,8 +40,8 @@ Kelola Data Kontak - {{ App.name }}
                                         <td><center>{{ i + 1 }}</center></td>
                                         <td>{{ data.name }}</td>
                                         <td>{{ data.email }}</td>
-                                        <td>{{ data.phone }}</td>
                                         <td>{{ data.message | truncate(50) }}</td>
+                                        <td>{{ data.created_at | date("d M Y H:i") }}</td>
                                         <td>
                                             <a href="{{ 'contact/messages/detail' | link }}/{{ data.id }}" title="Detail">
                                                 <i class="fa fa-pencil"></i>

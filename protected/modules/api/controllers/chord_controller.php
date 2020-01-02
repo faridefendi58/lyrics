@@ -43,9 +43,19 @@ class ChordController extends BaseController
         if (!array_key_exists('limit', $params)) {
             $params['limit'] = 100;
         }
-        $params['type'] = 'chord';
-        $model = new \ExtensionsModel\SongModel();
-        $items = $model->getSearch($params);
+
+		$items = [];
+		if (array_key_exists('cached', $params) &&  $params['cached'] > 0) {
+			$file = $this->_settings['basePath'] .'/data/chord_latest.json';
+            if(file_exists($file)) {
+                $content = file_get_contents($file);
+				$items = json_decode($content, true);
+            }
+        } else {
+		    $params['type'] = 'chord';
+		    $model = new \ExtensionsModel\SongModel();
+		    $items = $model->getSearch($params);
+		}
         if (is_array($items)){
             $result['success'] = 1;
             $result['data'] = $items;

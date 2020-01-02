@@ -100,6 +100,7 @@ $app->get('/kord[/{artist}[/{title}]]', function ($request, $response, $args) {
     $theme = $this->settings['theme'];
     $model = new \ExtensionsModel\SongModel();
 
+    $hide_adds = false;
     if (empty($args['title'])) {
         // it should be the title = artist slug if the length > 0
         if (strlen($args['artist']) > 1){
@@ -181,6 +182,16 @@ $app->get('/kord[/{artist}[/{title}]]', function ($request, $response, $args) {
                 return $response->withRedirect('/kord/' . $args['artist'] . '/' . $data['chord_slug']);
             }
         } else {
+            // boot page speed
+            $exclude_file = 'protected/data/exclude_adds.json';
+            if(file_exists($exclude_file)) {
+                $ex_content = file_get_contents($exclude_file);
+                $excludes = json_decode($ex_content, true);
+                if (is_array($excludes) && in_array($data['chord_permalink'], $excludes)) {
+                    $hide_adds = true;
+                }
+            }
+
             if (!empty($data['chord_permalink']) && $data['chord_permalink'] != $args['title']) {
                 // remove unused cached if any
                 return $response->withRedirect('/kord/'.$args['artist'].'/'.$data['chord_permalink']);
@@ -193,7 +204,8 @@ $app->get('/kord[/{artist}[/{title}]]', function ($request, $response, $args) {
 
         return $this->view->render($response, 'song_chord.phtml', [
             'data' => $data,
-            'msong' => $model
+            'msong' => $model,
+            'hide_adds' => $hide_adds
         ]);
     }
 
