@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+{% block pagetitle %}
+Update Artist - {{ App.params.site_name }}
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ 'css/bootstrap-fileupload.min.css' | admin_asset_url }}" />
+<div id="main_wrapper">
+    <div class="page_bar clearfix">
+        <div class="row">
+            <div class="col-sm-10">
+                <h1 class="page_title">Update Artist</h1>
+            </div>
+            <div class="col-sm-2 text-right">
+                <a class="btn btn-default" href="{{ 'song/images/artists' | link }}">Daftar Artist</a>
+            </div>
+        </div>
+    </div>
+    <div class="page_content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Update Artist
+                        </div>
+                        <div class="panel-body">
+                            <form method="post" id="artist-form"
+                                  action="{{ 'song/images/update-artist' | link }}/{{ data.basename }}"
+                                  enctype="multipart/form-data">
+
+                                <div class="alert alert-success" style="display: none;"></div>
+                                <div class="alert alert-warning" style="display: none;"></div>
+
+                                <div class="form-group col-md-6">
+                                    <label class="control-label">Artist Name <span class="red">*</span></label>
+                                    <input type="text" name="Artists[title]" value="{{ data.artist_name }}" class="form-control required">
+                                </div>
+
+                                <div class="form-group col-md-12">
+                                    <label class="control-label">Image <span class="red">*</span></label>
+                                    <img src="{{ data.folder_name | link }}"/>
+                                    <div class="fileupload fileupload-new" data-provides="fileupload">
+                                        <div class="input-append">
+                                            <div class="uneditable-input">
+                                                <i class="glyphicon glyphicon-file fileupload-exists"></i>
+                                                <span class="fileupload-preview"></span>
+                                            </div>
+                                            <span class="btn btn-default btn-file">
+                                                <span class="fileupload-new">Select file</span>
+                                                <span class="fileupload-exists">Change</span>
+                                                <input type="file" name="Artists[image]" class="reviewer-image"/>
+                                            </span>
+                                            <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">Remove</a>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix mb15"></div>
+                                </div>
+
+                                <div class="form-group col-md-12">
+                                    <input type="submit" name="Submit" value="Simpan" class="btn btn-success btn-submit" onclick="return saveArtist(this);">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="row">
+                        <div class="row">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% include 'partial/right_menu.html' %}
+{% endblock %}
+{% block endbodyjs %}
+<script src="{{ 'js/bootstrap-fileupload.min.js' | admin_asset_url }}"></script>
+<script type="text/javascript">
+    function saveArtist(dt) {
+        var validate = jb_validation.validate($('form[id="artist-form"]'));
+        if (!validate) {
+            return false;
+        }
+
+        var formData = new FormData($('form[id="artist-form"]')[0]);
+        var url = $(dt).parent().parent().attr('action');
+
+        $.ajax({
+            'url': url,
+            'type':'post',
+            'data': formData,
+            'dataType': 'json',
+            'async': false,
+            'success': function(data) {
+                console.log(data);
+                var alert_success = $('#artist-form').find('.alert-success');
+                var alert_warning = $('#artist-form').find('.alert-warning');
+                if (data.status == 'success') {
+                    alert_success.html(data.message);
+                    alert_success.show();
+                    alert_warning.hide();
+                    $('form[id="artist-form"]').find('.form-group').hide();
+                } else {
+                    alert_warning.html(data.message);
+                    alert_warning.show();
+                    alert_success.hide();
+                }
+            },
+            'errors': function (request, status, error) {
+                console.log(request.responseText);
+            },
+            'cache': false,
+            'contentType': false,
+            'processData': false
+        });
+
+        return false;
+    }
+</script>
+{% endblock %}

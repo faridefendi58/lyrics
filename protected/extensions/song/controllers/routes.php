@@ -263,6 +263,9 @@ $app->group('/song', function () use ($user) {
     $this->group('/genres', function() use ($user) {
         new Extensions\Controllers\GenresController($this, $user);
     });
+    $this->group('/images', function() use ($user) {
+        new Extensions\Controllers\ImagesController($this, $user);
+    });
 });
 
 ?>

@@ -14,6 +14,7 @@ class ChordController extends BaseController
     public function register($app)
     {
         $app->map(['GET'], '/search', [$this, 'get_search']);
+        $app->map(['GET'], '[/{artist}[/{slug}]]', [$this, 'get_song']);
     }
 
     public function accessRules()
@@ -67,5 +68,25 @@ class ChordController extends BaseController
         }
 
         return $response->withJson($result, 201);
+    }
+
+    public function get_song($request, $response, $args)
+    {
+        $model = new \ExtensionsModel\SongModel();
+
+        $dir = 'protected/data/songs/';
+        $file = $dir. $args['artist'].'_'.$args['slug'].'.json';
+        $data = [];
+        if(file_exists($file)) {
+            $data = file_get_contents($file);
+            if (!empty($data)) {
+                $data = json_decode($data, true);
+            }
+        }
+
+        return $this->_container->view->render($response, 'song_chord_mobile.phtml', [
+            'data' => $data,
+            'msong' => $model
+        ]);
     }
 }

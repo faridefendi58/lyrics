@@ -1093,7 +1093,10 @@ class ChordsController extends BaseController
 		        curl_setopt($ch, CURLOPT_URL, $url);
 
 		        if(curl_exec($ch) === false) {
-		            echo 'Curl error: ' . curl_error($ch);
+		            //echo 'Curl error: ' . curl_error($ch);
+                    $html = file_get_html($url);
+                    $html->clear();
+                    unset($html);
 		        } else {
 		            $success = $success + 1;
 		        }

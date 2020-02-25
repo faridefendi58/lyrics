@@ -197,7 +197,7 @@ class AdminTools
 	 */
 	public function getInspirationPages()
 	{
-		$pages = array();
+		$pages = array(); $excludes = [];
 		foreach (glob($this->basePath.'/../themes/'.$this->themeName.'/views/inspiration/*.phtml') as $filename) {
 			$page = basename($filename, '.phtml');
 			$name = ucwords( implode(" ", explode("-", $page)) );
