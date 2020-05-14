@@ -1,6 +1,6 @@
 <?php
 
-namespace Api\Controllers;
+namespace Mobile\Controllers;
 
 use Components\ApiBaseController as BaseController;
 

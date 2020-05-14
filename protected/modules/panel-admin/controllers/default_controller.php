@@ -26,32 +26,86 @@ class DefaultController extends BaseController
             return $response->withRedirect($this->_login_url);
         }
 
+        $r = null;
+        if (!empty($_GET['r'])) {
+            $r = $_GET['r'];
+        }
+        $remember = false;
+
+        $need_tfa = false; // 2fa
         if (isset($_POST['LoginForm'])){
             $username = strtolower($_POST['LoginForm']['username']);
             $model = \Model\AdminModel::model()->findByAttributes(['username'=>$username]);
             if ($model instanceof \RedBeanPHP\OODBBean){
-                $has_password = \Model\AdminModel::hasPassword($_POST['LoginForm']['password'], $model->salt);
-                if ($model->password == $has_password){
-                    $remember = false;
-                    if ($_POST['LoginForm']['remember'] > 0)
-                        $remember = true;
-                    $login = $this->_user->login($model, $remember);
-                    if ($login){
-                        if (isset($_GET['r']))
-                            return $response->withRedirect( $_GET['r'] );
-                        else
-                            return $response->withRedirect('/panel-admin');
+                if (!empty($_POST['LoginForm']['auth_code'])) {
+                    $tfa_model = \ExtensionsModel\TwofaModel::model()->findByAttributes(['admin_id' => $model->id]);
+                    if ($tfa_model instanceof \RedBeanPHP\OODBBean) {
+                        $ga = new \ExtensionsComponents\PHPGangsta_GoogleAuthenticator();
+                        if ($ga->verifyCode($tfa_model->secret_code, $_POST['LoginForm']['auth_code'])) {
+                            $login = $this->_user->login($model, $_POST['LoginForm']['remember']);
+                            if ($login){
+                                setcookie( 'auth_code', $_POST['LoginForm']['auth_code'], strtotime("+1 week", time()), "/");
+                                if (!empty($_POST['LoginForm']['r'])) {
+                                    return $response->withRedirect($_POST['LoginForm']['r']);
+                                } else {
+                                    return $response->withRedirect('/panel-admin');
+                                }
+                            }
+                        } else {
+                            $args['error']['message'] = 'Kode Autentikasi yang Anda masukkan salah.';
+                            if (isset($_POST['LoginForm']['r'])) {
+                                $r = $_POST['LoginForm']['r'];
+                            }
+                            if (isset($_POST['LoginForm']['remember'])) {
+                                $remember = $_POST['LoginForm']['remember'];
+                            }
+                            $need_tfa = true;
+                        }
                     }
                 } else {
-                    $args['error']['message'] = 'Password yang Anda masukkan salah.';
-                }
+                    $has_password = \Model\AdminModel::hasPassword($_POST['LoginForm']['password'], $model->salt);
+                    if ($model->password == $has_password){
+                        $remember = false;
+                        if ($_POST['LoginForm']['remember'] > 0)
+                            $remember = true;
+                        // check still has cookie or not
+                        if (!isset($_COOKIE['auth_code'])) {
+                            // 2fa
+                            $extensions = json_decode($this->_container->get('settings')['params']['extensions'], true);
+                            if (in_array('twofa', $extensions)) {
+                                $tfa_model = \ExtensionsModel\TwofaModel::model()->findByAttributes(['admin_id' => $model->id]);
+                                if ($tfa_model instanceof \RedBeanPHP\OODBBean) {
+                                    if ($tfa_model->status > 0) {
+                                        $need_tfa = true;
+                                    }
+                                }
+                            }
+                        }
 
+                        if (!$need_tfa) {
+                            $login = $this->_user->login($model, $remember);
+                            if ($login){
+                                if (isset($_GET['r']))
+                                    return $response->withRedirect($_GET['r']);
+                                else
+                                    return $response->withRedirect('/panel-admin');
+                            }
+                        }
+                    } else {
+                        $args['error']['message'] = 'Password yang Anda masukkan salah.';
+                    }
+                }
+            } else {
+                $args['error']['message'] = 'User tidak ditemukan';
             }
-            $args['error']['message'] = 'User tidak ditemukan';
         }
 
         return $this->_container->module->render($response, 'default/login.html', [
-            'result' => $args
+            'result' => $args,
+            'need_tfa' => $need_tfa,
+            'username' => (!empty($username))? $username : '',
+            'r' => $r,
+            'remember' => $remember,
         ]);
     }
 

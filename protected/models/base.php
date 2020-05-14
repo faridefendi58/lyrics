@@ -231,6 +231,26 @@ class BaseModel extends \RedBeanPHP\SimpleModel
     {
         return $this->_scenario;
     }
+
+    public function getAttributeLabels()
+    {
+        return (method_exists($this, 'attributeLabels'))? $this->attributeLabels() : [];
+    }
+
+    public function getAttributeLabel($attr)
+    {
+        $attributeLabels = $this->getAttributeLabels();
+        if (array_key_exists($attr, $attributeLabels)) {
+            return $attributeLabels[$attr];
+        }
+
+        if( strpos( $attr, "_" ) !== false) {
+            $explode = explode("_", $attr);
+            return ucwords(implode(" ", $explode));
+        } else {
+            return ucfirst($attr);
+        }
+    }
 }
 
 class R extends \RedBeanPHP\Facade { }

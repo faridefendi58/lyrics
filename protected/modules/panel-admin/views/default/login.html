@@ -16,6 +16,7 @@ Login - {{ App.name }}
         </div>
         {% endif %}
 
+        {% if not need_tfa %}
         <div class="form-group">
             <label for="login_username">Username</label>
             <input type="text" name="LoginForm[username]" class="form-control input-lg" id="login_username">
@@ -29,6 +30,16 @@ Login - {{ App.name }}
                 <input id="inlineCheckbox1" name="LoginForm[remember]" value="1" type="checkbox"> Remember me
             </label>
         </div>
+        {% else %}
+        <div class="form-group">
+            <label for="login_auth">Kode Autentikasi</label>
+            <input type="text" name="LoginForm[auth_code]" class="form-control input-lg" id="login_auth">
+            <input type="hidden" name="LoginForm[username]" value="{{ username }}">
+            <input type="hidden" name="LoginForm[r]" value="{{ r }}">
+            <input type="hidden" name="LoginForm[remember]" value="{{ remember }}">
+        </div>
+        {% endif %}
+
         <div class="submit_section">
             <button class="btn btn-lg btn-info btn-block">Continue</button>
         </div>
